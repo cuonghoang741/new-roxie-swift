@@ -1,0 +1,37 @@
+# macOS
+.DS_Store
+
+# Local agent / IDE config
+.claude/
+.vscode/
+.idea/
+
+# Xcode build / derived data
+build/
+DerivedData/
+*.dSYM.zip
+*.dSYM
+
+# Xcode user-specific
+**/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Sensitive
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+GoogleService-Info.plist
+google-services.json

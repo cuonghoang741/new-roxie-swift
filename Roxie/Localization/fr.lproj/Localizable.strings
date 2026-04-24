@@ -1,0 +1,92 @@
+/* Common */
+"common.close" = "Fermer";
+"common.cancel" = "Annuler";
+"common.save" = "Enregistrer";
+"common.done" = "Terminé";
+"common.loading" = "Chargement…";
+"common.retry" = "Réessayer";
+"common.ok" = "OK";
+"common.continue" = "Continuer";
+"common.finish" = "Terminer";
+"common.skip" = "Passer";
+
+/* Auth */
+"auth.tagline" = "Votre compagnon virtuel";
+"auth.welcome_title" = "Bienvenue, Maître !";
+"auth.welcome_subtitle" = "Encore quelques instants avant de se rencontrer !";
+"auth.sign_in_apple" = "Se connecter avec Apple";
+"auth.sign_in_google" = "Se connecter avec Google";
+"auth.continue_guest" = "Continuer en tant qu'invité";
+"auth.terms" = "Conditions";
+"auth.privacy" = "Confidentialité";
+"auth.eula" = "CLUF";
+"auth.age_title" = "Réservé aux adultes";
+"auth.age_body" = "Vous devez avoir au moins 18 ans. Confirmez votre âge pour continuer.";
+"auth.age_confirm" = "J'ai 18 ans ou plus";
+
+/* Onboarding */
+"onboarding.slide1.title" = "Salut !";
+"onboarding.slide1.body" = "Roxie vous aide à créer votre propre compagnon virtuel.";
+"onboarding.slide2.title" = "Personnalisation";
+"onboarding.slide2.body" = "Changez tenues, danses et décors selon votre humeur.";
+"onboarding.slide3.title" = "Chat & appels vocaux";
+"onboarding.slide3.body" = "Discutez ou appelez votre compagnon à tout moment.";
+"onboarding.start" = "Commencer";
+"onboarding.next" = "Suivant";
+"onboarding.gift_title" = "Cadeau de bienvenue";
+"onboarding.gift_body" = "Un personnage gratuit et des décors de départ vous attendent — ouvrez-les !";
+"onboarding.gift_claim" = "Réclamer";
+"onboarding.profile_title" = "Configurer le profil";
+"onboarding.profile_subtitle" = "Dites-nous votre nom et année de naissance pour personnaliser.";
+"onboarding.display_name" = "Nom affiché";
+"onboarding.display_name_placeholder" = "Ex : Alex";
+"onboarding.birth_year" = "Année de naissance";
+"onboarding.birth_year_placeholder" = "Ex : 2000";
+"onboarding.character_picked" = "Personnage choisi";
+"onboarding.saving" = "Enregistrement…";
+
+/* Character */
+"character.choose" = "Choisir un personnage";
+"character.pick" = "Choisir";
+"character.view_detail" = "Voir les détails";
+"character.loading" = "Chargement des personnages…";
+
+/* Experience */
+"experience.initializing" = "Initialisation…";
+"subscription.title" = "Roxie Pro";
+"subscription.body" = "Passez Pro pour débloquer tous les personnages, décors et appels illimités.";
+"subscription.cta" = "Acheter Pro";
+"sheet.backgrounds" = "Décors";
+"sheet.characters" = "Personnages";
+"sheet.costumes" = "Tenues";
+"sheet.quests" = "Quêtes";
+"sheet.energy" = "Énergie";
+"sheet.level" = "Niveau";
+"sheet.streak" = "Série";
+"sheet.ruby_purchase" = "Acheter Ruby";
+"sheet.settings" = "Paramètres";
+"sheet.quest_daily" = "Quêtes journalières";
+"sheet.no_costumes" = "Aucune tenue disponible pour ce personnage.";
+"sheet.owned" = "Possédé";
+
+/* Settings */
+"settings.guest" = "Mode invité";
+"settings.sign_out" = "Se déconnecter";
+"settings.section_account" = "Compte";
+"settings.section_info" = "À propos";
+
+/* Chat */
+"chat.input_placeholder" = "Écrire un message…";
+"chat.history_title" = "Historique du chat";
+"chat.empty_hint" = "Dites quelque chose de gentil pour commencer 💕";
+"chat.load_more" = "Charger les anciens messages";
+"chat.typing" = "écrit…";
+"chat.date_today" = "Aujourd'hui";
+"chat.date_yesterday" = "Hier";
+"chat.upgrade_pro" = "💎 Passer Pro";
+"chat.call_started" = "Appel démarré";
+"chat.call_ended" = "Appel terminé";
+
+/* Errors */
+"error.load" = "Impossible de charger les données";
+"error.network" = "Erreur réseau";

@@ -1,0 +1,92 @@
+/* Common */
+"common.close" = "閉じる";
+"common.cancel" = "キャンセル";
+"common.save" = "保存";
+"common.done" = "完了";
+"common.loading" = "読み込み中…";
+"common.retry" = "再試行";
+"common.ok" = "OK";
+"common.continue" = "次へ";
+"common.finish" = "完了";
+"common.skip" = "スキップ";
+
+/* Auth */
+"auth.tagline" = "あなたのバーチャルパートナー";
+"auth.welcome_title" = "ようこそ、マスター!";
+"auth.welcome_subtitle" = "あと少しで会えるよ!";
+"auth.sign_in_apple" = "Appleでサインイン";
+"auth.sign_in_google" = "Googleでサインイン";
+"auth.continue_guest" = "ゲストとして続ける";
+"auth.terms" = "利用規約";
+"auth.privacy" = "プライバシー";
+"auth.eula" = "EULA";
+"auth.age_title" = "成人向け";
+"auth.age_body" = "このアプリを利用するには18歳以上である必要があります。年齢を確認してください。";
+"auth.age_confirm" = "18歳以上です";
+
+/* Onboarding */
+"onboarding.slide1.title" = "こんにちは!";
+"onboarding.slide1.body" = "Roxieで自分だけのバーチャルパートナーを作ろう。";
+"onboarding.slide2.title" = "自由にカスタマイズ";
+"onboarding.slide2.body" = "衣装・ダンス・背景を気分に合わせて変えよう。";
+"onboarding.slide3.title" = "チャット & 通話";
+"onboarding.slide3.body" = "いつでもメッセージや音声通話ができます。";
+"onboarding.start" = "はじめる";
+"onboarding.next" = "次へ";
+"onboarding.gift_title" = "ようこそギフト";
+"onboarding.gift_body" = "無料のキャラクターとスタート背景をプレゼント — 今すぐ受け取ろう!";
+"onboarding.gift_claim" = "受け取る";
+"onboarding.profile_title" = "プロフィール設定";
+"onboarding.profile_subtitle" = "名前と生まれ年を教えてね。";
+"onboarding.display_name" = "表示名";
+"onboarding.display_name_placeholder" = "例: ゆうた";
+"onboarding.birth_year" = "生まれ年";
+"onboarding.birth_year_placeholder" = "例: 2000";
+"onboarding.character_picked" = "選択したキャラクター";
+"onboarding.saving" = "保存中…";
+
+/* Character */
+"character.choose" = "キャラクターを選ぶ";
+"character.pick" = "選択";
+"character.view_detail" = "詳細";
+"character.loading" = "キャラクターを読み込み中…";
+
+/* Experience */
+"experience.initializing" = "初期化中…";
+"subscription.title" = "Roxie Pro";
+"subscription.body" = "Proにアップグレードすると、すべてのキャラ・背景・無制限の通話が使えます。";
+"subscription.cta" = "Proを購入";
+"sheet.backgrounds" = "背景";
+"sheet.characters" = "キャラクター";
+"sheet.costumes" = "衣装";
+"sheet.quests" = "クエスト";
+"sheet.energy" = "エナジー";
+"sheet.level" = "レベル";
+"sheet.streak" = "ストリーク";
+"sheet.ruby_purchase" = "ルビーを購入";
+"sheet.settings" = "設定";
+"sheet.quest_daily" = "デイリークエスト";
+"sheet.no_costumes" = "このキャラクターの衣装はありません。";
+"sheet.owned" = "所持中";
+
+/* Settings */
+"settings.guest" = "ゲストモード";
+"settings.sign_out" = "サインアウト";
+"settings.section_account" = "アカウント";
+"settings.section_info" = "情報";
+
+/* Chat */
+"chat.input_placeholder" = "メッセージを入力…";
+"chat.history_title" = "チャット履歴";
+"chat.empty_hint" = "何か可愛いことを話しかけてみよう 💕";
+"chat.load_more" = "過去のメッセージを読む";
+"chat.typing" = "入力中…";
+"chat.date_today" = "今日";
+"chat.date_yesterday" = "昨日";
+"chat.upgrade_pro" = "💎 Proにアップグレード";
+"chat.call_started" = "通話開始";
+"chat.call_ended" = "通話終了";
+
+/* Errors */
+"error.load" = "データを読み込めませんでした";
+"error.network" = "ネットワークエラー";
