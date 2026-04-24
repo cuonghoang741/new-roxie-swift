@@ -162,6 +162,66 @@ final class AuthManager: NSObject {
         }
     }
 
+    /// Wipe the user's data from Supabase tables, clear local persistence,
+    /// then sign out. Mirrors `deleteAccountLocally` from the RN AuthManager.
+    func deleteAccount() async {
+        isLoading = true
+        errorMessage = nil
+        defer { isLoading = false }
+
+        let userId = user?.id.uuidString.lowercased()
+        let clientId = userId == nil ? ClientIdStore.ensureClientId() : nil
+
+        let tables = [
+            "relationship_milestones", "character_relationship", "level_up_rewards",
+            "user_daily_quests", "user_level_quests", "user_login_rewards",
+            "user_streaks", "user_medals", "user_character", "user_stats",
+            "user_currency", "user_assets", "transactions", "purchases",
+            "subscriptions", "user_preferences", "api_characters", "conversation",
+            "app_feedback", "calls", "scheduled_notifications",
+            "user_notification_preferences", "spicy_content_notifications",
+            "notification_counters", "user_call_quota",
+            "custom_character_requests", "user_background",
+        ]
+        let skipClientId: Set<String> = ["api_characters", "subscriptions", "user_call_quota"]
+
+        for table in tables {
+            do {
+                let q = client.from(table).delete()
+                if let userId {
+                    var query = q.eq("user_id", value: userId)
+                    if !skipClientId.contains(table) {
+                        query = query.is("client_id", value: nil)
+                    }
+                    _ = try await query.execute()
+                } else if let clientId {
+                    _ = try await q.eq("client_id", value: clientId).is("user_id", value: nil).execute()
+                }
+            } catch {
+                Log.auth.warning("delete \(table) failed: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+
+        // Wipe all local UserDefaults keys we own.
+        for key in [
+            PersistKeys.characterId, PersistKeys.modelName, PersistKeys.modelURL,
+            PersistKeys.backgroundURL, PersistKeys.backgroundName,
+            PersistKeys.backgroundSelections, PersistKeys.costumeSelections,
+            PersistKeys.hasRatedApp, PersistKeys.lastReviewPromptAt,
+            PersistKeys.ageVerified18, PersistKeys.hasCompletedOnboardingV2,
+            PersistKeys.isNewUser,
+            "settings.autoPlayMusic", "settings.hapticsEnabled", "settings.enableNSFW",
+            "persist.guestAcknowledged", "persist.hasClaimedNewUserGift",
+        ] {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+        ClientIdStore.clearClientId()
+
+        await RevenueCatManager.shared.logout()
+        await OneSignalService.shared.removeExternalUserId()
+        await logout()
+    }
+
     func continueAsGuest() {
         _ = ClientIdStore.ensureClientId()
         UserDefaults.standard.set("true", forKey: "persist.guestAcknowledged")

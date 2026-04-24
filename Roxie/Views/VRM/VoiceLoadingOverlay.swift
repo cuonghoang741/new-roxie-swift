@@ -8,6 +8,7 @@ struct VoiceLoadingOverlay: View {
 
     var body: some View {
         ZStack {
+            // Background image (character/scene), then blur + dim
             if let backgroundURL, let url = URL(string: backgroundURL) {
                 AsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
@@ -22,30 +23,12 @@ struct VoiceLoadingOverlay: View {
                 .ignoresSafeArea()
             }
 
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-
+            Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
             Color.black.opacity(0.4).ignoresSafeArea()
 
+            // Centered content
             VStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white.opacity(0.1))
-                        .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
-                    if let avatarURL, let url = URL(string: avatarURL) {
-                        AsyncImage(url: url) { image in
-                            image.resizable().scaledToFill()
-                        } placeholder: {
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 36))
-                                .foregroundStyle(.white.opacity(0.6))
-                        }
-                        .clipShape(Circle())
-                        .padding(4)
-                    }
-                }
-                .frame(width: 120, height: 120)
+                avatarBubble
 
                 Text(characterName)
                     .font(.system(size: 24, weight: .bold))
@@ -62,10 +45,34 @@ struct VoiceLoadingOverlay: View {
                         .padding(.leading, 4)
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .opacity(visible ? 1 : 0)
         .animation(.easeInOut(duration: 0.3), value: visible)
         .allowsHitTesting(visible)
+    }
+
+    private var avatarBubble: some View {
+        ZStack {
+            Circle()
+                .fill(Color.white.opacity(0.1))
+                .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
+
+            if let avatarURL, let url = URL(string: avatarURL) {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .frame(width: 112, height: 112)
+                .clipShape(Circle())
+            }
+        }
+        .frame(width: 120, height: 120)
     }
 }
 

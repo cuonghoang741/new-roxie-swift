@@ -59,7 +59,12 @@ struct SubscriptionScreen: View {
             }
         }
         .onAppear { setupPlayer() }
-        .onDisappear { player?.pause() }
+        .onChange(of: vrm.currentCharacter?.id) { _, _ in setupPlayer() }
+        .onChange(of: vrm.currentCostume?.id) { _, _ in setupPlayer() }
+        .onDisappear {
+            player?.pause()
+            player = nil
+        }
         .preferredColorScheme(.dark)
         .statusBarHidden(false)
     }

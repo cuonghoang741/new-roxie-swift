@@ -12,6 +12,7 @@ struct SettingsSheet: View {
     @State private var showLanguagePicker = false
     @State private var showEditProfile = false
     @State private var showFeedback = false
+    @State private var browserURL: URL?
 
     private var isPro: Bool { RevenueCatManager.shared.isProUser }
 
@@ -78,9 +79,11 @@ struct SettingsSheet: View {
                     }
 
                     sectionGroup("Legal & Support") {
-                        SettingsLinkRow(icon: "doc.text.fill", iconTint: .gray, label: "Terms of Service", url: AppConfig.Legal.terms)
+                        SettingsRow(icon: "doc.text.fill", iconTint: .gray, label: "Terms of Service") { browserURL = AppConfig.Legal.terms }
                         Divider().opacity(0.08)
-                        SettingsLinkRow(icon: "lock.shield.fill", iconTint: .gray, label: "Privacy Policy", url: AppConfig.Legal.privacy)
+                        SettingsRow(icon: "lock.shield.fill", iconTint: .gray, label: "Privacy Policy") { browserURL = AppConfig.Legal.privacy }
+                        Divider().opacity(0.08)
+                        SettingsRow(icon: "doc.plaintext.fill", iconTint: .gray, label: "EULA") { browserURL = AppConfig.Legal.eula }
                         Divider().opacity(0.08)
                         SettingsRow(icon: "star.fill", iconTint: .yellow, label: "Rate Us") { rateApp() }
                         Divider().opacity(0.08)
@@ -125,6 +128,7 @@ struct SettingsSheet: View {
             .sheet(isPresented: $showLanguagePicker) { LanguagePickerSheet() }
             .sheet(isPresented: $showEditProfile) { EditProfileSheet() }
             .sheet(isPresented: $showFeedback) { FeedbackSheet() }
+            .inAppBrowser(url: $browserURL)
         }
         .preferredColorScheme(.dark)
     }
@@ -386,17 +390,30 @@ struct EditProfileSheet: View {
                 }
             }
             .confirmationDialog(
-                "Delete your account? This cannot be undone.",
+                "Delete your account? This permanently removes your data and cannot be undone.",
                 isPresented: $showDeleteConfirm,
                 titleVisibility: .visible
             ) {
-                Button("Delete", role: .destructive) {
+                Button("Delete Account", role: .destructive) {
                     Task {
-                        await auth.logout()
+                        await auth.deleteAccount()
                         dismiss()
                     }
                 }
                 Button("Cancel", role: .cancel) {}
+            }
+            .overlay {
+                if auth.isLoading {
+                    ZStack {
+                        Color.black.opacity(0.4).ignoresSafeArea()
+                        VStack(spacing: 12) {
+                            ProgressView().tint(.white).scaleEffect(1.4)
+                            Text("Deleting account...")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
             }
         }
     }

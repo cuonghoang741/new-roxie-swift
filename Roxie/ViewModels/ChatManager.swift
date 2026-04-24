@@ -168,6 +168,17 @@ final class ChatManager {
         if !showChatList { showChatList = true }
     }
 
+    func addSystemMessage(_ text: String, isAgent: Bool = false) {
+        let message = ChatUIMessage(
+            id: UUID().uuidString,
+            kind: .system(text),
+            isAgent: isAgent,
+            createdAt: Date()
+        )
+        append(message)
+        if !showChatList { showChatList = true }
+    }
+
     func addAgentMessage(_ text: String, persist: Bool = true) {
         let message = ChatUIMessage(
             id: UUID().uuidString,

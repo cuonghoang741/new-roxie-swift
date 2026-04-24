@@ -86,6 +86,15 @@ struct VRMExperienceScreen: View {
                 .transition(.opacity)
             }
 
+            if isInCall {
+                CallControlsOverlay(
+                    remainingSeconds: voice.remainingQuotaSeconds,
+                    isCameraMode: voice.isCameraMode,
+                    onEndCall: { Task { await handleToggleMic() } }
+                )
+                .transition(.opacity)
+            }
+
             ToastOverlay(toast: toast)
 
             if showInitialLoading {
@@ -250,9 +259,8 @@ struct VRMExperienceScreen: View {
         if voice.isConnected || voice.isBooting || voice.isConnecting {
             await voice.endCall()
             bridge?.setCallMode(false)
-            chat.addAgentMessage(L10n.chatCallEnded, persist: false)
+            appendCallEndedMessage()
         } else {
-            chat.addAgentMessage(L10n.chatCallStarted, persist: false)
             bridge?.setCallMode(true)
             await voice.startVoiceCall(character: vrm.currentCharacter)
         }
@@ -262,10 +270,18 @@ struct VRMExperienceScreen: View {
         if voice.isConnected {
             voice.toggleCameraMode()
         } else {
-            chat.addAgentMessage(L10n.chatCallStarted, persist: false)
             bridge?.setCallMode(true)
             await voice.startVideoCall(character: vrm.currentCharacter)
         }
+    }
+
+    private func appendCallEndedMessage() {
+        let secs = voice.lastCallDurationSeconds
+        let m = secs / 60
+        let s = secs % 60
+        let durationStr = "\(m)m\(s)s"
+        let name = vrm.currentCharacter?.name ?? "Character"
+        chat.addSystemMessage("Call \(name) \(durationStr)")
     }
 
     private func handleCapture() {
