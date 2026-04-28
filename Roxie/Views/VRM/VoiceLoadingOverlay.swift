@@ -8,41 +8,46 @@ struct VoiceLoadingOverlay: View {
 
     var body: some View {
         ZStack {
-            // Background image (character/scene), then blur + dim
             if let backgroundURL, let url = URL(string: backgroundURL) {
                 AsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
-                } placeholder: { Color.black }
+                } placeholder: { Cyber.bg }
                 .ignoresSafeArea()
             }
-
             if let avatarURL, let url = URL(string: avatarURL) {
                 AsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
-                } placeholder: { Color.black.opacity(0.5) }
+                } placeholder: { Cyber.bg.opacity(0.5) }
                 .ignoresSafeArea()
             }
-
             Rectangle().fill(.ultraThinMaterial).ignoresSafeArea()
-            Color.black.opacity(0.4).ignoresSafeArea()
+            Cyber.bg.opacity(0.55).ignoresSafeArea()
+            scanlines
 
-            // Centered content
-            VStack(spacing: 16) {
+            VStack(spacing: 18) {
+                Text(L10n.Cyber.establishingLink)
+                    .font(Cyber.mono(10, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                    .tracking(2)
+
                 avatarBubble
+                    .padding(.top, 4)
 
-                Text(characterName)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
-                    .shadow(color: .black.opacity(0.3), radius: 4, y: 1)
-
-                HStack(spacing: 6) {
-                    PulseDot(delay: 0)
-                    PulseDot(delay: 0.2)
-                    PulseDot(delay: 0.4)
-                    Text("Calling")
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.85))
-                        .padding(.leading, 4)
+                VStack(spacing: 4) {
+                    Text(characterName.uppercased())
+                        .font(Cyber.mono(20, weight: .heavy))
+                        .foregroundStyle(Cyber.text)
+                        .tracking(2)
+                    HStack(spacing: 6) {
+                        StatusDot(tint: Cyber.lime)
+                        Text(L10n.Cyber.connecting)
+                            .font(Cyber.mono(11, weight: .heavy))
+                            .foregroundStyle(Cyber.lime)
+                            .tracking(1.6)
+                        PulseDot(delay: 0)
+                        PulseDot(delay: 0.2)
+                        PulseDot(delay: 0.4)
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -54,25 +59,34 @@ struct VoiceLoadingOverlay: View {
 
     private var avatarBubble: some View {
         ZStack {
-            Circle()
-                .fill(Color.white.opacity(0.1))
-                .overlay(Circle().stroke(Color.white.opacity(0.2), lineWidth: 1))
-
+            HexagonShape().fill(Cyber.bg.opacity(0.5))
+            HexagonShape().stroke(Cyber.cyan.opacity(0.7), lineWidth: 1.5)
             if let avatarURL, let url = URL(string: avatarURL) {
                 AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
+                    image.resizable().aspectRatio(contentMode: .fill)
                 } placeholder: {
                     Image(systemName: "person.fill")
                         .font(.system(size: 36))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(Cyber.cyan.opacity(0.6))
                 }
-                .frame(width: 112, height: 112)
-                .clipShape(Circle())
+                .frame(width: 110, height: 124)
+                .clipShape(HexagonShape())
             }
         }
-        .frame(width: 120, height: 120)
+        .frame(width: 130, height: 150)
+        .shadow(color: Cyber.cyan.opacity(0.7), radius: 16)
+    }
+
+    private var scanlines: some View {
+        VStack(spacing: 3) {
+            ForEach(0..<60) { _ in
+                Color.white.opacity(0.05).frame(height: 1)
+                Color.clear.frame(height: 3)
+            }
+        }
+        .blendMode(.overlay)
+        .allowsHitTesting(false)
+        .ignoresSafeArea()
     }
 }
 
@@ -81,11 +95,12 @@ private struct PulseDot: View {
     @State private var pulse = false
 
     var body: some View {
-        Circle()
-            .fill(Color.white.opacity(0.85))
-            .frame(width: 6, height: 6)
+        Rectangle()
+            .fill(Cyber.lime)
+            .frame(width: 4, height: 4)
             .scaleEffect(pulse ? 1.4 : 0.8)
             .opacity(pulse ? 0.4 : 1)
+            .shadow(color: Cyber.lime.opacity(0.8), radius: pulse ? 4 : 1)
             .animation(.easeInOut(duration: 0.6).repeatForever().delay(delay), value: pulse)
             .onAppear { pulse = true }
     }

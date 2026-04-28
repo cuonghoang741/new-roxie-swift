@@ -10,47 +10,113 @@ struct CharacterPreviewScreen: View {
     @State private var index: Int = 0
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Palette.GrayDark.s900.ignoresSafeArea()
+        ZStack {
+            Cyber.bg.ignoresSafeArea()
+            CyberGridBackdrop().opacity(0.18).ignoresSafeArea()
+            ScanLineBackdrop().ignoresSafeArea()
 
-                if characters.isEmpty {
-                    ProgressView(L10n.loadingCharacters).tint(.white)
-                } else {
+            if characters.isEmpty {
+                VStack(spacing: 10) {
+                    ProgressView().tint(Cyber.cyan).scaleEffect(1.2)
+                    Text(L10n.Cyber.loadingRoster)
+                        .font(Cyber.mono(11, weight: .heavy))
+                        .foregroundStyle(Cyber.textDim)
+                        .tracking(1.4)
+                }
+            } else {
+                VStack(spacing: 0) {
+                    header
                     TabView(selection: $index) {
                         ForEach(characters.indices, id: \.self) { i in
-                            let character = characters[i]
-                            CharacterCard(character: character, isOwned: ownedIds.contains(character.id))
-                                .tag(i)
+                            CharacterCard(character: characters[i], isOwned: ownedIds.contains(characters[i].id))
                                 .padding(.horizontal, 16)
+                                .padding(.top, 6)
+                                .tag(i)
                         }
                     }
-                    .tabViewStyle(.page(indexDisplayMode: .always))
-                }
+                    .tabViewStyle(.page(indexDisplayMode: .never))
 
-                VStack {
-                    Spacer()
+                    counterStrip
+
                     if let character = currentCharacter {
-                        PrimaryButton(title: ownedIds.contains(character.id) ? L10n.pick : L10n.viewDetail) {
+                        Button {
                             onPick(character)
+                        } label: {
+                            HStack(spacing: 10) {
+                                Text(ownedIds.contains(character.id) ? L10n.Cyber.charSelect : L10n.Cyber.charPreview)
+                                    .font(Cyber.mono(13, weight: .heavy))
+                                    .tracking(1.6)
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 13, weight: .heavy))
+                            }
+                            .foregroundStyle(Cyber.bg)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing))
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                            .shadow(color: Cyber.cyan.opacity(0.7), radius: 10)
                         }
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 32)
+                        .padding(.horizontal, 22)
+                        .padding(.bottom, 28)
                     }
                 }
-            }
-            .navigationTitle(L10n.chooseCharacter)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(L10n.close) { onDismiss() }
-                        .foregroundStyle(.white)
-                }
-            }
-            .onAppear {
-                index = min(max(0, initialIndex), max(0, characters.count - 1))
             }
         }
+        .onAppear {
+            index = min(max(0, initialIndex), max(0, characters.count - 1))
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    private var header: some View {
+        HStack(spacing: 10) {
+            Button { onDismiss() } label: {
+                ZStack {
+                    Rectangle().fill(Cyber.surface.opacity(0.85))
+                    Rectangle().stroke(Cyber.cyan.opacity(0.7), lineWidth: 1)
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(Cyber.cyan)
+                }
+                .frame(width: 36, height: 36)
+                .shadow(color: Cyber.cyan.opacity(0.5), radius: 5)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L10n.Cyber.charCompanions)
+                    .font(Cyber.mono(10, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                    .tracking(1.6)
+                Text(L10n.Cyber.charSelectPartner)
+                    .font(Cyber.mono(12, weight: .heavy))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1.2)
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+    }
+
+    private var counterStrip: some View {
+        HStack {
+            Text("[\(index + 1)/\(characters.count)]")
+                .font(Cyber.mono(10, weight: .heavy))
+                .foregroundStyle(Cyber.textDim)
+                .tracking(1.4)
+            Spacer()
+            HStack(spacing: 4) {
+                ForEach(characters.indices, id: \.self) { i in
+                    Rectangle()
+                        .fill(i == index ? Cyber.cyan : Cyber.textMuted)
+                        .frame(width: i == index ? 18 : 4, height: 3)
+                        .animation(.easeInOut(duration: 0.25), value: index)
+                }
+            }
+        }
+        .padding(.horizontal, 22)
+        .padding(.vertical, 10)
     }
 
     private var currentCharacter: CharacterItem? {
@@ -65,42 +131,61 @@ private struct CharacterCard: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            ZStack {
+            ZStack(alignment: .topTrailing) {
                 if let url = URL(string: character.thumbnailUrl ?? character.avatar ?? "") {
                     AsyncImage(url: url) { img in
-                        img.resizable().scaledToFill()
+                        img.resizable().aspectRatio(contentMode: .fill)
                     } placeholder: {
-                        Rectangle().fill(Color.gray.opacity(0.15))
+                        Cyber.surfaceHi
                     }
                 } else {
-                    Rectangle().fill(Color.gray.opacity(0.15))
+                    Cyber.surfaceHi
+                }
+
+                CornerBrackets(tint: Cyber.cyan, size: 14, thickness: 1.5)
+
+                if isOwned {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10, weight: .heavy))
+                        Text(L10n.Cyber.owned)
+                            .font(Cyber.mono(9, weight: .heavy))
+                            .tracking(1.4)
+                    }
+                    .foregroundStyle(Cyber.bg)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Cyber.lime)
+                    .padding(10)
                 }
             }
+            .frame(maxWidth: .infinity)
             .frame(height: 420)
-            .clipShape(RoundedRectangle(cornerRadius: 24))
+            .background(Cyber.surface)
+            .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.4), lineWidth: 1))
+            .clipShape(Rectangle())
 
-            VStack(spacing: 6) {
-                Text(character.name ?? "")
-                    .font(.title2.bold())
-                    .foregroundStyle(.white)
+            VStack(spacing: 4) {
+                Text((character.name ?? "—").uppercased())
+                    .font(Cyber.mono(18, weight: .heavy))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1.6)
                 if let description = character.description {
                     Text(description)
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .font(Cyber.mono(11, weight: .semibold))
+                        .foregroundStyle(Cyber.textDim)
+                        .tracking(0.6)
+                        .multilineTextAlignment(.center)
                         .lineLimit(3)
                 }
                 if !isOwned {
-                    HStack(spacing: 8) {
-                        if let price = character.priceRuby {
-                            Label("\(price)", systemImage: "diamond.fill")
-                                .foregroundStyle(Palette.Brand.s300)
-                        }
-                        if let price = character.priceVcoin {
-                            Label("\(price)", systemImage: "dollarsign.circle.fill")
-                                .foregroundStyle(.yellow)
-                        }
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.fill").font(.system(size: 10, weight: .heavy))
+                        Text(L10n.Cyber.proRequired)
+                            .font(Cyber.mono(10, weight: .heavy))
+                            .tracking(1.4)
                     }
-                    .font(.footnote)
+                    .foregroundStyle(Cyber.magenta)
                 }
             }
         }

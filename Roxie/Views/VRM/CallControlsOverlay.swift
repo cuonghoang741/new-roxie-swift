@@ -30,28 +30,39 @@ struct CallControlsOverlay: View {
     }
 
     private var countdownChip: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "phone.fill")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color(hex: "#4ADE80"))
+        HStack(spacing: 8) {
+            StatusDot(tint: Cyber.lime)
+            Text(L10n.Cyber.live)
+                .font(Cyber.mono(10, weight: .heavy))
+                .foregroundStyle(Cyber.lime)
+                .tracking(1.4)
             Text(formatTime(remainingSeconds))
-                .font(.system(size: 14, weight: .semibold).monospacedDigit())
-                .foregroundStyle(.white)
+                .font(Cyber.mono(14, weight: .heavy))
+                .foregroundStyle(Cyber.text)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(Capsule().fill(Color.black.opacity(0.6)))
-        .overlay(Capsule().stroke(Color.white.opacity(0.18), lineWidth: 1))
+        .background(Cyber.surface.opacity(0.85))
+        .overlay(Rectangle().stroke(Cyber.lime.opacity(0.7), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .shadow(color: Cyber.lime.opacity(0.5), radius: 6)
     }
 
     private var endCallButton: some View {
         Button(action: onEndCall) {
-            Image(systemName: "phone.down.fill")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(Circle().fill(Color(hex: "#FF3B30")))
-                .shadow(color: .black.opacity(0.3), radius: 6, y: 2)
+            HStack(spacing: 6) {
+                Image(systemName: "phone.down.fill")
+                    .font(.system(size: 13, weight: .heavy))
+                Text(L10n.Cyber.actionEnd)
+                    .font(Cyber.mono(11, weight: .heavy))
+                    .tracking(1.4)
+            }
+            .foregroundStyle(Cyber.bg)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Cyber.danger)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .shadow(color: Cyber.danger.opacity(0.6), radius: 8)
         }
     }
 

@@ -202,6 +202,7 @@ struct VRMExperienceScreen: View {
                         bridge?.triggerDance()
                     }
                     isDancing = true
+                    root.showDanceSheet = false
                 },
                 onLockedTap: {
                     root.showDanceSheet = false
@@ -210,6 +211,7 @@ struct VRMExperienceScreen: View {
                 onStop: {
                     bridge?.stopAction()
                     isDancing = false
+                    root.showDanceSheet = false
                 },
                 isDancing: isDancing
             )
@@ -222,6 +224,7 @@ struct VRMExperienceScreen: View {
                 ownedIds: vrm.initialData.ownedMediaIds,
                 onSend: { media in
                     Task { await chat.sendMedia(media) }
+                    root.showMediaSheet = false
                 },
                 onLockedTap: {
                     root.showMediaSheet = false
@@ -328,20 +331,33 @@ struct VRMExperienceScreen: View {
 }
 
 private struct InitialLoadingOverlay: View {
+    @State private var glow = false
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Palette.Brand.s500, Palette.Brand.s900], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            VStack(spacing: 16) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.white)
-                Text(L10n.initializing)
-                    .foregroundStyle(.white)
-                    .font(.headline)
-                ProgressView().tint(.white)
+            Cyber.bg.ignoresSafeArea()
+            VStack(spacing: 18) {
+                ZStack {
+                    HexagonShape()
+                        .stroke(Cyber.cyan.opacity(0.7), lineWidth: 2)
+                        .shadow(color: Cyber.cyan.opacity(glow ? 0.9 : 0.3), radius: glow ? 18 : 6)
+                    Image(systemName: "circle.hexagongrid.fill")
+                        .font(.system(size: 38, weight: .heavy))
+                        .foregroundStyle(Cyber.cyan)
+                }
+                .frame(width: 100, height: 115)
+                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: glow)
+
+                Text(L10n.Cyber.initializing)
+                    .font(Cyber.mono(11, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                    .tracking(2.4)
+                Text("//bonie.os")
+                    .font(Cyber.mono(13, weight: .semibold))
+                    .foregroundStyle(Cyber.textDim)
+                    .tracking(1.4)
             }
         }
+        .onAppear { glow = true }
     }
 }
 
@@ -350,20 +366,22 @@ private struct SimpleSheet: View {
     let subtitle: String
 
     var body: some View {
-        NavigationStack {
+        CyberSheetChrome(title: title, subtitle: "Quest // Daily", tint: Cyber.amber) {
             VStack(spacing: 16) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 48))
-                    .foregroundStyle(Palette.Brand.s500)
-                    .padding(.top, 40)
-                Text(title).font(.title.bold())
-                Text(subtitle)
+                Image(systemName: "shield.lefthalf.filled")
+                    .font(.system(size: 48, weight: .heavy))
+                    .foregroundStyle(Cyber.amber)
+                    .shadow(color: Cyber.amber.opacity(0.7), radius: 8)
+                    .padding(.top, 24)
+                Text(subtitle.uppercased())
+                    .font(Cyber.mono(13, weight: .heavy))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1.4)
                     .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
                     .padding(.horizontal)
                 Spacer()
             }
-            .presentationDetents([.medium, .large])
         }
+        .presentationDetents([.medium, .large])
     }
 }

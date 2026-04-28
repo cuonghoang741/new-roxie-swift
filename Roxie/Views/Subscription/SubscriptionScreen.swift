@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import Combine
 
 struct SubscriptionScreen: View {
     var onClose: () -> Void
@@ -8,211 +9,243 @@ struct SubscriptionScreen: View {
     @State private var selectedPlan: Plan = .yearly
     @State private var player: AVPlayer?
     @State private var isProcessing = false
+    @State private var playerReady: Bool = false
+    @State private var statusCancellable: AnyCancellable?
+    @State private var browserURL: URL?
 
     enum Plan: Hashable {
         case yearly, monthly
-
-        var name: String { self == .yearly ? "Yearly" : "Monthly" }
+        var name: String { self == .yearly ? "ANNUAL" : "MONTHLY" }
         var priceString: String { self == .yearly ? "$59.99" : "$9.99" }
-        var period: String { self == .yearly ? "per year" : "per month" }
-        var subDetail: String? { self == .yearly ? "$5.00/per month" : nil }
+        var period: String { self == .yearly ? "PER YEAR" : "PER MONTH" }
+        var subDetail: String? { self == .yearly ? "$5.00 / mo" : nil }
+        var code: String { self == .yearly ? "PRO.A" : "PRO.M" }
     }
 
-    private let features: [(systemImage: String, text: String)] = [
-        ("infinity", "Unlimited messages, no daily limits"),
-        ("photo.stack.fill", "Access secreted photos and videos"),
-        ("video.fill", "30 minutes of video calls each month"),
-        ("person.2.fill", "Unlock 15+ and all upcoming girlfriends"),
-        ("tshirt.fill", "Unlimited outfits"),
-        ("photo.on.rectangle.angled", "Unlimited backgrounds"),
+    private let perks: [(systemImage: String, text: String)] = [
+        ("infinity", "UNLIMITED MESSAGES"),
+        ("photo.stack.fill", "EXCLUSIVE MEDIA VAULT"),
+        ("video.fill", "30 MIN VIDEO / MONTH"),
+        ("person.2.fill", "15+ COMPANIONS UNLOCKED"),
+        ("tshirt.fill", "FULL OUTFIT LIBRARY"),
+        ("photo.on.rectangle.angled", "FULL BACKGROUND LIBRARY"),
     ]
 
     private var defaultVideoURL: URL? {
         URL(string: "https://pub-6671ed00c8d945b28ff7d8ec392f60b8.r2.dev/videos/Smiling_sweetly_to_202601061626_n3trm%20(online-video-cutter.com).mp4")
     }
-
+    private var heroCharacter: CharacterItem? { vrm.currentCharacter }
     private var heroVideoURL: URL? {
         if let s = vrm.currentCostume?.videoUrl, let u = URL(string: s) { return u }
-        if let s = vrm.currentCharacter?.videoUrl, let u = URL(string: s) { return u }
+        if let s = heroCharacter?.videoUrl, let u = URL(string: s) { return u }
         return defaultVideoURL
     }
-
     private var discountText: String? {
-        // Yearly $59.99 vs Monthly $9.99 * 12 = $119.88 → ~50% savings
         let monthly = 9.99 * 12.0
         let yearly = 59.99
         let pct = Int(((monthly - yearly) / monthly) * 100)
-        return pct > 0 ? "\(pct)% OFF" : nil
+        return pct > 0 ? "-\(pct)%" : nil
     }
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color.black.ignoresSafeArea()
+            Cyber.bg.ignoresSafeArea()
 
-            videoHeader
-                .ignoresSafeArea()
+            videoBackdrop
+            scanlineOverlay
+            CyberGrid().opacity(0.18).ignoresSafeArea()
 
             VStack(spacing: 0) {
                 topBar
-                Spacer()
-                bottomSheet
+                Spacer(minLength: 0)
+                bottomDeck
             }
         }
         .onAppear { setupPlayer() }
         .onChange(of: vrm.currentCharacter?.id) { _, _ in setupPlayer() }
         .onChange(of: vrm.currentCostume?.id) { _, _ in setupPlayer() }
-        .onDisappear {
-            player?.pause()
-            player = nil
-        }
+        .onDisappear { player?.pause(); player = nil }
         .preferredColorScheme(.dark)
-        .statusBarHidden(false)
+        .inAppBrowser(url: $browserURL)
     }
 
-    // MARK: - Top half: video + gradient
+    // MARK: - Layers
 
-    private var videoHeader: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .bottom) {
-                if let player {
-                    VideoPlayer(player: player)
-                        .disabled(true)
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: geo.size.width, height: geo.size.height * 0.65)
-                        .clipped()
-                } else {
-                    Color.black
-                        .frame(width: geo.size.width, height: geo.size.height * 0.65)
+    private var videoBackdrop: some View {
+        ZStack(alignment: .bottom) {
+            // Layer 1: poster image as backdrop while video loads.
+            if let img = heroCharacter?.thumbnailUrl ?? heroCharacter?.avatar,
+               let url = URL(string: img) {
+                AsyncImage(url: url) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Cyber.bg
                 }
-
-                LinearGradient(
-                    colors: [.clear, Color.black.opacity(0.8), .black],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(width: geo.size.width, height: geo.size.height * 0.65 * 0.5)
+                .frame(maxWidth: .infinity)
+                .frame(height: 540)
+                .clipped()
+                .id(heroCharacter?.id)
+                .transition(.opacity)
+            } else {
+                Cyber.bg.frame(height: 540)
             }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+
+            // Layer 2: video, only shown once first frame is ready.
+            if let player, playerReady {
+                FillVideoPlayer(player: player)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 540)
+                    .clipped()
+                    .transition(.opacity)
+                    .allowsHitTesting(false)
+            }
+
+            LinearGradient(
+                colors: [.clear, Cyber.bg.opacity(0.4), Cyber.bg, Cyber.bg],
+                startPoint: .top, endPoint: .bottom
+            )
+            .frame(height: 540)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea()
+        .animation(.easeInOut(duration: 0.25), value: playerReady)
     }
 
-    // MARK: - Top bar (close button)
+    private var scanlineOverlay: some View {
+        VStack(spacing: 3) {
+            ForEach(0..<60) { _ in
+                Color.white.opacity(0.04).frame(height: 1)
+                Color.clear.frame(height: 3)
+            }
+        }
+        .blendMode(.overlay)
+        .allowsHitTesting(false)
+        .ignoresSafeArea()
+    }
 
     private var topBar: some View {
         HStack {
+            HStack(spacing: 8) {
+                Text("//")
+                    .font(Cyber.mono(13, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                Text("BONIE_OS  v1.0")
+                    .font(Cyber.mono(11, weight: .semibold))
+                    .foregroundStyle(Cyber.textDim)
+                    .tracking(1)
+            }
             Spacer()
             Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.black)
-                    .frame(width: 44, height: 44)
-                    .background(
-                        Circle().fill(Color.white.opacity(0.9))
-                    )
+                ZStack {
+                    Rectangle().fill(Cyber.surface.opacity(0.85))
+                    Rectangle().stroke(Cyber.cyan.opacity(0.7), lineWidth: 1)
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .heavy))
+                        .foregroundStyle(Cyber.cyan)
+                }
+                .frame(width: 38, height: 38)
+                .shadow(color: Cyber.cyan.opacity(0.6), radius: 6)
             }
         }
         .padding(.horizontal, 16)
         .padding(.top, 8)
     }
 
-    // MARK: - Bottom: hero + features + plans + cta + footer
+    private var bottomDeck: some View {
+        VStack(spacing: 18) {
+            heroBlock
+            perksBlock
+            planBlock
+            ctaBlock
+            footerLinks
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
+    }
 
-    private var bottomSheet: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                VStack(spacing: 14) {
-                    proBadge
-                    Text("Stay With Me\nWithout Limits")
-                        .font(.system(size: 32, weight: .heavy))
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.white)
-                        .lineSpacing(4)
+    private var heroBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text("[ TIER ]")
+                    .font(Cyber.mono(10, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                    .tracking(1.4)
+                Text("PRO.UNLIMITED")
+                    .font(Cyber.mono(11, weight: .heavy))
+                    .foregroundStyle(Cyber.magenta)
+                    .tracking(1.2)
+                Spacer()
+                StatusDot(tint: Cyber.lime)
+            }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("STAY")
+                    .font(.system(size: 38, weight: .black))
+                    .foregroundStyle(Cyber.text)
+                Text("WITH//ME")
+                    .font(Cyber.mono(28, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                    .shadow(color: Cyber.cyan.opacity(0.7), radius: 6)
+            }
+            Text("WITHOUT.LIMITS")
+                .font(.system(size: 38, weight: .black))
+                .foregroundStyle(Cyber.text)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(features, id: \.text) { feature in
-                            HStack(spacing: 12) {
-                                Image(systemName: feature.systemImage)
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 24, height: 24)
-                                Text(feature.text)
-                                    .font(.system(size: 15, weight: .medium))
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 4)
+    private var perksBlock: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(perks, id: \.text) { perk in
+                HStack(spacing: 10) {
+                    Image(systemName: perk.systemImage)
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(Cyber.cyan)
+                        .frame(width: 18)
+                    Text("//")
+                        .font(Cyber.mono(11, weight: .heavy))
+                        .foregroundStyle(Cyber.cyan.opacity(0.6))
+                    Text(perk.text)
+                        .font(Cyber.mono(11, weight: .semibold))
+                        .foregroundStyle(Cyber.text)
+                        .tracking(0.8)
+                    Spacer()
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 10)
-                .padding(.bottom, 10)
             }
-            .scrollIndicators(.hidden)
-
-            VStack(spacing: 16) {
-                planCards
-                upgradeButton
-                footerLinks
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
         }
+        .padding(12)
+        .background(Cyber.surface.opacity(0.7))
+        .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.4), lineWidth: 1))
+        .overlay(CornerBrackets(tint: Cyber.cyan, size: 8))
     }
 
-    private var proBadge: some View {
-        HStack(spacing: 8) {
-            Text("Bonie")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
-            Text("Pro")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(.black)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 2)
-                .background(
-                    LinearGradient(
-                        colors: [Color(hex: "#FFD91B"), Color(hex: "#FFE979")],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(
-            Capsule().fill(Color.black.opacity(0.6))
-        )
-        .overlay(
-            Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1)
-        )
-    }
-
-    private var planCards: some View {
-        HStack(spacing: 12) {
-            PlanCard(
-                title: "Yearly",
+    private var planBlock: some View {
+        HStack(spacing: 10) {
+            CyberPlanCard(
+                code: Plan.yearly.code,
+                name: Plan.yearly.name,
                 price: Plan.yearly.priceString,
                 period: Plan.yearly.period,
                 subDetail: Plan.yearly.subDetail,
-                badge: selectedPlan == .yearly ? discountText : nil,
+                badge: discountText,
+                tint: Cyber.magenta,
                 isSelected: selectedPlan == .yearly,
                 onTap: { selectedPlan = .yearly }
             )
-            PlanCard(
-                title: "Monthly",
+            CyberPlanCard(
+                code: Plan.monthly.code,
+                name: Plan.monthly.name,
                 price: Plan.monthly.priceString,
                 period: Plan.monthly.period,
                 subDetail: nil,
                 badge: nil,
+                tint: Cyber.cyan,
                 isSelected: selectedPlan == .monthly,
                 onTap: { selectedPlan = .monthly }
             )
         }
     }
 
-    private var upgradeButton: some View {
+    private var ctaBlock: some View {
         Button {
             isProcessing = true
             Task {
@@ -222,47 +255,49 @@ struct SubscriptionScreen: View {
             }
         } label: {
             ZStack {
-                LinearGradient(
-                    colors: [Color(hex: "#FFD91B"), Color(hex: "#FFE979")],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
+                LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing)
                 if isProcessing {
-                    ProgressView().tint(.black)
+                    ProgressView().tint(Cyber.bg)
                 } else {
-                    Text("Upgrade")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.black)
+                    HStack(spacing: 10) {
+                        Image(systemName: "bolt.fill").font(.system(size: 14, weight: .heavy))
+                        Text("INITIALIZE PRO//")
+                            .font(Cyber.mono(14, weight: .heavy))
+                            .tracking(1.4)
+                    }
+                    .foregroundStyle(Cyber.bg)
                 }
             }
             .frame(height: 52)
-            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .shadow(color: Cyber.magenta.opacity(0.7), radius: 10)
         }
-        .buttonStyle(.plain)
         .disabled(isProcessing)
         .opacity(isProcessing ? 0.7 : 1)
     }
 
     private var footerLinks: some View {
         HStack(spacing: 12) {
-            Link("Privacy Policy", destination: AppConfig.Legal.privacy)
-                .font(.system(size: 12))
-                .foregroundStyle(.white)
-            Text("|").font(.system(size: 12)).foregroundStyle(Color.white.opacity(0.3))
-            Button("Restore Purchase") {}
-                .font(.system(size: 12))
-                .foregroundStyle(.white)
-            Text("|").font(.system(size: 12)).foregroundStyle(Color.white.opacity(0.3))
-            Link("Terms of Use", destination: AppConfig.Legal.terms)
-                .font(.system(size: 12))
-                .foregroundStyle(.white)
+            Button { browserURL = AppConfig.Legal.privacy } label: { footerText(L10n.Cyber.subPrivacy) }
+            Text("//").font(Cyber.mono(10, weight: .heavy)).foregroundStyle(Cyber.cyan.opacity(0.5))
+            Button { } label: { footerText(L10n.Cyber.subRestore) }
+            Text("//").font(Cyber.mono(10, weight: .heavy)).foregroundStyle(Cyber.cyan.opacity(0.5))
+            Button { browserURL = AppConfig.Legal.terms } label: { footerText(L10n.Cyber.subTerms) }
         }
     }
 
-    // MARK: - Player
+    private func footerText(_ s: String) -> some View {
+        Text(s)
+            .font(Cyber.mono(10, weight: .heavy))
+            .foregroundStyle(Cyber.textDim)
+            .tracking(1.4)
+    }
 
     private func setupPlayer() {
         guard let url = heroVideoURL else { return }
+        playerReady = false
+        statusCancellable?.cancel()
+
         let item = AVPlayerItem(url: url)
         let p = AVPlayer(playerItem: item)
         p.isMuted = true
@@ -271,67 +306,117 @@ struct SubscriptionScreen: View {
             forName: .AVPlayerItemDidPlayToEndTime,
             object: item,
             queue: .main
-        ) { _ in
-            p.seek(to: .zero)
-            p.play()
-        }
+        ) { _ in p.seek(to: .zero); p.play() }
+
+        statusCancellable = item.publisher(for: \.status, options: [.initial, .new])
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                if status == .readyToPlay { playerReady = true }
+            }
+
         player = p
         p.play()
     }
 }
 
-private struct PlanCard: View {
-    let title: String
+private struct CyberPlanCard: View {
+    let code: String
+    let name: String
     let price: String
     let period: String
     let subDetail: String?
     let badge: String?
+    let tint: Color
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(code)
+                        .font(Cyber.mono(9, weight: .heavy))
+                        .foregroundStyle(tint)
+                        .tracking(1.4)
+                    Spacer()
+                    if let badge {
+                        Text(badge)
+                            .font(Cyber.mono(10, weight: .heavy))
+                            .foregroundStyle(Cyber.bg)
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(tint)
+                    }
+                }
+                Text(name)
+                    .font(Cyber.mono(13, weight: .heavy))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1.2)
                 Text(price)
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 24, weight: .black))
+                    .foregroundStyle(Cyber.text)
                 Text(period)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.white.opacity(0.6))
+                    .font(Cyber.mono(9, weight: .semibold))
+                    .foregroundStyle(Cyber.textDim)
+                    .tracking(1)
                 if let subDetail {
                     Text(subDetail)
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.white.opacity(0.4))
+                        .font(Cyber.mono(9, weight: .semibold))
+                        .foregroundStyle(tint)
+                        .tracking(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isSelected ? Color(hex: "#2196F3").opacity(0.15) : Color.white.opacity(0.1))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isSelected ? Color(hex: "#2196F3") : .clear, lineWidth: 2)
-            )
-            .overlay(alignment: .topTrailing) {
-                if let badge {
-                    Text(badge)
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .fill(Color(hex: "#2196F3"))
-                        )
-                        .offset(x: 4, y: -12)
-                }
-            }
+            .padding(12)
+            .background(isSelected ? tint.opacity(0.12) : Cyber.surface.opacity(0.78))
+            .overlay(Rectangle().stroke(isSelected ? tint : tint.opacity(0.35), lineWidth: isSelected ? 1.5 : 1))
+            .overlay(CornerBrackets(tint: tint, size: 8))
+            .shadow(color: isSelected ? tint.opacity(0.6) : .clear, radius: isSelected ? 8 : 0)
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// AVPlayer wrapper that uses `.resizeAspectFill` so the video crops to fill
+/// instead of letterboxing. SwiftUI's `VideoPlayer` doesn't expose this.
+private struct FillVideoPlayer: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> PlayerView {
+        let v = PlayerView()
+        v.playerLayer.player = player
+        v.playerLayer.videoGravity = .resizeAspectFill
+        return v
+    }
+
+    func updateUIView(_ uiView: PlayerView, context: Context) {
+        if uiView.playerLayer.player !== player {
+            uiView.playerLayer.player = player
+        }
+    }
+
+    final class PlayerView: UIView {
+        override class var layerClass: AnyClass { AVPlayerLayer.self }
+        var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    }
+}
+
+private struct CyberGrid: View {
+    var body: some View {
+        Canvas { ctx, size in
+            let step: CGFloat = 32
+            let stroke = GraphicsContext.Shading.color(.white.opacity(0.06))
+            for x in stride(from: 0, through: size.width, by: step) {
+                var p = Path()
+                p.move(to: .init(x: x, y: 0))
+                p.addLine(to: .init(x: x, y: size.height))
+                ctx.stroke(p, with: stroke, lineWidth: 0.5)
+            }
+            for y in stride(from: 0, through: size.height, by: step) {
+                var p = Path()
+                p.move(to: .init(x: 0, y: y))
+                p.addLine(to: .init(x: size.width, y: y))
+                ctx.stroke(p, with: stroke, lineWidth: 0.5)
+            }
+        }
     }
 }

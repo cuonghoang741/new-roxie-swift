@@ -65,7 +65,7 @@ struct ChatBottomOverlay: View {
             }
         }
         .padding(.horizontal, 10)
-        .padding(.bottom, 8)
+        .padding(.bottom, inputFocused ? 6 : 8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.easeInOut(duration: 0.2), value: inputFocused)
     }

@@ -90,3 +90,127 @@
 /* Errors */
 "error.load" = "Couldn't load data";
 "error.network" = "Network error";
+
+/* Cyber HUD */
+"cyber.online" = "ONLINE";
+"cyber.live" = "LIVE//";
+"cyber.connecting" = "CONNECTING";
+"cyber.establishing_link" = "//ESTABLISHING_LINK";
+"cyber.booting" = "BOOTING //";
+"cyber.initializing" = "INITIALIZING";
+
+"cyber.action.capture" = "CAPT";
+"cyber.action.send" = "SEND";
+"cyber.action.dance" = "DANCE";
+"cyber.action.stop" = "STOP";
+"cyber.action.end" = "END";
+
+"cyber.input_placeholder" = "TRANSMIT";
+
+"cyber.sheet.companions" = "Companions";
+"cyber.sheet.companions_sub" = "Select // %d units";
+"cyber.sheet.environments" = "Environments";
+"cyber.sheet.environments_sub" = "Scene // %d maps";
+"cyber.sheet.outfits" = "Outfits";
+"cyber.sheet.outfits_sub" = "Wardrobe // %d";
+"cyber.sheet.choreo" = "Choreo";
+"cyber.sheet.choreo_sub" = "Routine // %d";
+"cyber.sheet.vault" = "Vault";
+"cyber.sheet.vault_sub" = "Send // %d assets";
+"cyber.sheet.settings" = "Settings";
+"cyber.sheet.language" = "Language";
+"cyber.sheet.language_sub" = "Select // Locale";
+"cyber.sheet.profile" = "Profile_Edit";
+"cyber.sheet.profile_sub" = "User // Mutate";
+"cyber.sheet.feedback" = "Feedback";
+"cyber.sheet.feedback_sub" = "Transmit // Report";
+"cyber.sheet.chat_log" = "CHAT_LOG";
+
+"cyber.stop_routine" = "STOP // ROUTINE";
+"cyber.pro_only" = "// PRO ONLY";
+"cyber.pro_required" = "PRO_REQUIRED";
+"cyber.owned" = "OWNED";
+"cyber.free" = "FREE";
+"cyber.empty_outfits" = "// NO OUTFITS";
+"cyber.empty_vault" = "// EMPTY VAULT";
+"cyber.log_empty" = "// LOG EMPTY";
+"cyber.load_more" = "LOAD_MORE //";
+"cyber.loading_archive" = "// LOADING ARCHIVE";
+"cyber.loading_roster" = "// LOADING ROSTER";
+"cyber.archive_count" = "ARCHIVE // %d ENTRIES";
+
+"cyber.sub.tier" = "[ TIER ]";
+"cyber.sub.pro_unlimited" = "PRO.UNLIMITED";
+"cyber.sub.title_1" = "STAY";
+"cyber.sub.title_2" = "WITH//ME";
+"cyber.sub.title_3" = "WITHOUT.LIMITS";
+"cyber.sub.perk_1" = "UNLIMITED MESSAGES";
+"cyber.sub.perk_2" = "EXCLUSIVE MEDIA VAULT";
+"cyber.sub.perk_3" = "30 MIN VIDEO / MONTH";
+"cyber.sub.perk_4" = "15+ COMPANIONS UNLOCKED";
+"cyber.sub.perk_5" = "FULL OUTFIT LIBRARY";
+"cyber.sub.perk_6" = "FULL BACKGROUND LIBRARY";
+"cyber.sub.annual" = "ANNUAL";
+"cyber.sub.monthly" = "MONTHLY";
+"cyber.sub.per_year" = "PER YEAR";
+"cyber.sub.per_month" = "PER MONTH";
+"cyber.sub.initialize" = "INITIALIZE PRO//";
+"cyber.sub.privacy" = "PRIVACY";
+"cyber.sub.restore" = "RESTORE";
+"cyber.sub.terms" = "TERMS";
+
+"cyber.settings.account_section" = "Your Account";
+"cyber.settings.preferences_section" = "Preferences";
+"cyber.settings.legal_section" = "Legal & Support";
+"cyber.settings.subscription" = "Subscription";
+"cyber.settings.edit_profile" = "Edit Profile";
+"cyber.settings.notifications" = "Notifications";
+"cyber.settings.auto_music" = "Auto-play Music";
+"cyber.settings.haptics" = "Haptics";
+"cyber.settings.nsfw" = "NSFW Content";
+"cyber.settings.language" = "Language";
+"cyber.settings.terms" = "Terms of Service";
+"cyber.settings.privacy" = "Privacy Policy";
+"cyber.settings.eula" = "EULA";
+"cyber.settings.rate" = "Rate Us";
+"cyber.settings.report" = "Report a Problem";
+"cyber.settings.pro_active" = "PRO//ACTIVE";
+"cyber.settings.init_pro" = "INITIALIZE PRO";
+"cyber.settings.full_access" = "FULL_ACCESS = TRUE";
+"cyber.settings.unlock_false" = "UNLOCK_ALL = FALSE";
+"cyber.settings.delete_account" = "DELETE_ACCOUNT";
+"cyber.settings.irreversible" = "//IRREVERSIBLE";
+"cyber.settings.purging" = "// PURGING DATA";
+"cyber.settings.save_profile" = "SAVE_PROFILE";
+"cyber.settings.alias" = "ALIAS";
+"cyber.settings.email" = "EMAIL";
+
+"cyber.feedback.bug" = "BUG_REPORT";
+"cyber.feedback.feature" = "FEATURE_REQ";
+"cyber.feedback.placeholder" = "Tell us more...";
+"cyber.feedback.transmit" = "TRANSMIT";
+
+"cyber.onboard.welcome" = "//WELCOME";
+"cyber.onboard.customize" = "//CUSTOMIZE";
+"cyber.onboard.connect" = "//CONNECT";
+"cyber.onboard.welcome_body" = "Bonie initializes a private companion that lives just for you.";
+"cyber.onboard.customize_body" = "Swap outfits, environments and choreography on the fly.";
+"cyber.onboard.connect_body" = "Talk, chat and call your companion anytime, anywhere.";
+"cyber.onboard.skip" = "SKIP //";
+"cyber.onboard.next" = "NEXT //";
+"cyber.onboard.initialize" = "INITIALIZE //";
+
+"cyber.gift.title" = "//WELCOME_PACK";
+"cyber.gift.claim" = "CLAIM_AIRDROP //";
+
+"cyber.profile.setup" = "[ PROFILE.SETUP ]";
+"cyber.profile.identify" = "//IDENTIFY";
+"cyber.profile.enter_alias" = "ENTER_ALIAS";
+"cyber.profile.birth_hint" = "YYYY";
+"cyber.profile.finalize" = "FINALIZE //";
+"cyber.profile.companion_linked" = "// COMPANION_LINKED";
+
+"cyber.char.select" = "SELECT //";
+"cyber.char.preview" = "PREVIEW //";
+"cyber.char.companions" = "// COMPANIONS";
+"cyber.char.select_partner" = "SELECT YOUR PARTNER";

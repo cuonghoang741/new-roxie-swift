@@ -90,3 +90,127 @@
 /* Errors */
 "error.load" = "データを読み込めませんでした";
 "error.network" = "ネットワークエラー";
+
+/* Cyber HUD */
+"cyber.online" = "オンライン";
+"cyber.live" = "ライブ//";
+"cyber.connecting" = "接続中";
+"cyber.establishing_link" = "//接続を確立中";
+"cyber.booting" = "起動中 //";
+"cyber.initializing" = "初期化中";
+
+"cyber.action.capture" = "撮影";
+"cyber.action.send" = "送信";
+"cyber.action.dance" = "ダンス";
+"cyber.action.stop" = "停止";
+"cyber.action.end" = "終了";
+
+"cyber.input_placeholder" = "送信内容";
+
+"cyber.sheet.companions" = "コンパニオン";
+"cyber.sheet.companions_sub" = "選択 // %d 人";
+"cyber.sheet.environments" = "背景";
+"cyber.sheet.environments_sub" = "シーン // %d";
+"cyber.sheet.outfits" = "衣装";
+"cyber.sheet.outfits_sub" = "ワードローブ // %d";
+"cyber.sheet.choreo" = "コレオ";
+"cyber.sheet.choreo_sub" = "ルーティン // %d";
+"cyber.sheet.vault" = "ヴォルト";
+"cyber.sheet.vault_sub" = "送信 // %d 件";
+"cyber.sheet.settings" = "設定";
+"cyber.sheet.language" = "言語";
+"cyber.sheet.language_sub" = "ロケールを選択";
+"cyber.sheet.profile" = "プロフィール編集";
+"cyber.sheet.profile_sub" = "ユーザー // 変更";
+"cyber.sheet.feedback" = "フィードバック";
+"cyber.sheet.feedback_sub" = "送信 // 報告";
+"cyber.sheet.chat_log" = "チャットログ";
+
+"cyber.stop_routine" = "停止 // ルーティン";
+"cyber.pro_only" = "// PRO限定";
+"cyber.pro_required" = "PRO_必須";
+"cyber.owned" = "所持";
+"cyber.free" = "無料";
+"cyber.empty_outfits" = "// 衣装なし";
+"cyber.empty_vault" = "// ヴォルトが空";
+"cyber.log_empty" = "// ログなし";
+"cyber.load_more" = "もっと読む //";
+"cyber.loading_archive" = "// アーカイブ読込中";
+"cyber.loading_roster" = "// ロースター読込中";
+"cyber.archive_count" = "アーカイブ // %d 件";
+
+"cyber.sub.tier" = "[ ティア ]";
+"cyber.sub.pro_unlimited" = "PRO.無制限";
+"cyber.sub.title_1" = "ずっと";
+"cyber.sub.title_2" = "一緒に//";
+"cyber.sub.title_3" = "無制限で";
+"cyber.sub.perk_1" = "メッセージ無制限";
+"cyber.sub.perk_2" = "限定メディアコレクション";
+"cyber.sub.perk_3" = "毎月30分のビデオ通話";
+"cyber.sub.perk_4" = "15体以上のコンパニオン解放";
+"cyber.sub.perk_5" = "全衣装ライブラリ";
+"cyber.sub.perk_6" = "全背景ライブラリ";
+"cyber.sub.annual" = "年間";
+"cyber.sub.monthly" = "月額";
+"cyber.sub.per_year" = "年あたり";
+"cyber.sub.per_month" = "月あたり";
+"cyber.sub.initialize" = "PROを起動//";
+"cyber.sub.privacy" = "プライバシー";
+"cyber.sub.restore" = "復元";
+"cyber.sub.terms" = "利用規約";
+
+"cyber.settings.account_section" = "アカウント";
+"cyber.settings.preferences_section" = "環境設定";
+"cyber.settings.legal_section" = "規約とサポート";
+"cyber.settings.subscription" = "サブスクリプション";
+"cyber.settings.edit_profile" = "プロフィール編集";
+"cyber.settings.notifications" = "通知";
+"cyber.settings.auto_music" = "音楽自動再生";
+"cyber.settings.haptics" = "触覚フィードバック";
+"cyber.settings.nsfw" = "NSFWコンテンツ";
+"cyber.settings.language" = "言語";
+"cyber.settings.terms" = "利用規約";
+"cyber.settings.privacy" = "プライバシーポリシー";
+"cyber.settings.eula" = "EULA";
+"cyber.settings.rate" = "評価する";
+"cyber.settings.report" = "問題を報告";
+"cyber.settings.pro_active" = "PRO//有効";
+"cyber.settings.init_pro" = "PROを起動";
+"cyber.settings.full_access" = "FULL_ACCESS = TRUE";
+"cyber.settings.unlock_false" = "UNLOCK_ALL = FALSE";
+"cyber.settings.delete_account" = "アカウント削除";
+"cyber.settings.irreversible" = "//取消不可";
+"cyber.settings.purging" = "// データ削除中";
+"cyber.settings.save_profile" = "プロフィール保存";
+"cyber.settings.alias" = "ニックネーム";
+"cyber.settings.email" = "メール";
+
+"cyber.feedback.bug" = "バグ報告";
+"cyber.feedback.feature" = "機能要望";
+"cyber.feedback.placeholder" = "詳しく教えてください…";
+"cyber.feedback.transmit" = "送信";
+
+"cyber.onboard.welcome" = "//ようこそ";
+"cyber.onboard.customize" = "//カスタマイズ";
+"cyber.onboard.connect" = "//接続";
+"cyber.onboard.welcome_body" = "Bonieはあなただけのプライベートなコンパニオンを起動します。";
+"cyber.onboard.customize_body" = "衣装、背景、振付をその場で切り替え。";
+"cyber.onboard.connect_body" = "いつでもどこでもチャット・通話できます。";
+"cyber.onboard.skip" = "スキップ //";
+"cyber.onboard.next" = "次へ //";
+"cyber.onboard.initialize" = "起動 //";
+
+"cyber.gift.title" = "//ウェルカムパック";
+"cyber.gift.claim" = "エアドロップ受取 //";
+
+"cyber.profile.setup" = "[ プロフィール設定 ]";
+"cyber.profile.identify" = "//識別";
+"cyber.profile.enter_alias" = "ニックネーム入力";
+"cyber.profile.birth_hint" = "YYYY";
+"cyber.profile.finalize" = "完了 //";
+"cyber.profile.companion_linked" = "// コンパニオン連携済";
+
+"cyber.char.select" = "選択 //";
+"cyber.char.preview" = "プレビュー //";
+"cyber.char.companions" = "// コンパニオン";
+"cyber.char.select_partner" = "パートナーを選んで";

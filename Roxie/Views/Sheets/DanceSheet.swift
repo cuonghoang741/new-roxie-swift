@@ -8,45 +8,56 @@ struct DanceSheet: View {
     var onStop: () -> Void
     var isDancing: Bool
 
-    @Environment(\.dismiss) private var dismiss
-
-    private let columns = [GridItem(.adaptive(minimum: 100), spacing: 12)]
+    private let columns = [GridItem(.adaptive(minimum: 100), spacing: 10)]
     private var isPro: Bool { RevenueCatManager.shared.isProUser }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 12) {
-                    ForEach(items) { item in
-                        let locked = !isPro && (item.tier ?? "free").lowercased() != "free" && !ownedIds.contains(item.id)
-                        Button {
-                            if locked { onLockedTap() } else { onPlay(item); dismiss() }
-                        } label: {
-                            DanceTile(item: item, locked: locked)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(16)
-            }
-            .navigationTitle("Dance")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) { Button(L10n.close) { dismiss() } }
+        CyberSheetChrome(title: L10n.Cyber.sheetChoreo,
+                         subtitle: String(format: L10n.Cyber.sheetChoreoSub, items.count),
+                         tint: Cyber.magenta) {
+            VStack(spacing: 0) {
                 if isDancing {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            onStop()
-                            dismiss()
-                        } label: {
-                            Label("Stop", systemImage: "stop.fill")
-                                .foregroundStyle(.red)
+                    Button {
+                        onStop()
+                    } label: {
+                        HStack {
+                            Image(systemName: "stop.fill").font(.system(size: 12, weight: .heavy))
+                            Text(L10n.Cyber.stopRoutine)
+                                .font(Cyber.mono(11, weight: .heavy))
+                                .tracking(1.4)
+                            Spacer()
+                            StatusDot(tint: Cyber.danger)
+                        }
+                        .foregroundStyle(Cyber.bg)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Cyber.danger)
+                        .overlay(CornerBrackets(tint: Cyber.bg.opacity(0.4), size: 6))
+                        .shadow(color: Cyber.danger.opacity(0.6), radius: 8)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 10)
+                }
+
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 10) {
+                        ForEach(items) { item in
+                            let locked = !isPro && (item.tier ?? "free").lowercased() != "free" && !ownedIds.contains(item.id)
+                            Button {
+                                if locked { onLockedTap() } else { onPlay(item) }
+                            } label: {
+                                DanceTile(item: item, locked: locked)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
+                    .padding(14)
                 }
+                .scrollIndicators(.hidden)
             }
-            .presentationDetents([.medium, .large])
         }
+        .presentationDetents([.large])
     }
 }
 
@@ -55,42 +66,38 @@ private struct DanceTile: View {
     let locked: Bool
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 0) {
             ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.gray.opacity(0.15))
-                    .aspectRatio(1, contentMode: .fit)
-
+                Rectangle().fill(Cyber.surface)
                 if let url = item.iconUrl, let u = URL(string: url) {
                     AsyncImage(url: u) { img in
-                        img.resizable().scaledToFit().padding(12)
+                        img.resizable().scaledToFit().padding(10)
                     } placeholder: {
                         Text(item.emoji ?? "💃").font(.system(size: 36))
                     }
                 } else {
                     Text(item.emoji ?? "💃").font(.system(size: 36))
                 }
+                if locked { CyberLockOverlay() }
+            }
+            .aspectRatio(1, contentMode: .fit)
 
+            VStack(spacing: 2) {
+                Text((item.name ?? "—").uppercased())
+                    .font(Cyber.mono(10, weight: .heavy))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1)
+                    .lineLimit(1)
                 if locked {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.black.opacity(0.4))
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
+                    Text(L10n.Cyber.proOnly).font(Cyber.mono(8, weight: .heavy))
+                        .foregroundStyle(Cyber.magenta).tracking(1.2)
                 }
             }
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-            Text(item.name ?? "")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.primary)
-                .lineLimit(1)
-
-            if locked {
-                Label("Pro", systemImage: "crown.fill")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#FFB800"))
-            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .background(Cyber.surface.opacity(0.95))
         }
+        .overlay(Rectangle().stroke(Cyber.magenta.opacity(0.5), lineWidth: 1))
+        .overlay(CornerBrackets(tint: Cyber.magenta, size: 7))
     }
 }

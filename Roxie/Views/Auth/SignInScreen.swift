@@ -206,32 +206,66 @@ struct SafariWebView: UIViewControllerRepresentable {
 
 struct LanguagePickerSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @State private var refreshTrigger = false
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(L10n.Locale.allCases) { locale in
-                    Button {
-                        AppLanguage.set(locale)
-                        dismiss()
-                        // Tell user to relaunch (iOS picks up AppleLanguages on next launch).
-                        // Alternatively we could do a full UI bundle swap here.
-                        exit(0)
-                    } label: {
-                        HStack {
-                            Text(locale.displayName).foregroundStyle(.primary)
-                            Spacer()
-                            if locale == AppLanguage.current {
-                                Image(systemName: "checkmark").foregroundStyle(Palette.Brand.s500)
-                            }
-                        }
+        CyberSheetChrome(title: L10n.Cyber.sheetLanguage, subtitle: L10n.Cyber.sheetLanguageSub, tint: Cyber.cyan) {
+            ScrollView {
+                VStack(spacing: 10) {
+                    ForEach(L10n.Locale.allCases) { locale in
+                        languageRow(locale)
+                    }
+                }
+                .padding(16)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .presentationDetents([.large])
+        .id(refreshTrigger)
+    }
+
+    private func languageRow(_ locale: L10n.Locale) -> some View {
+        let active = locale == AppLanguage.current
+        return Button {
+            AppLanguage.set(locale)
+            refreshTrigger.toggle()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                dismiss()
+            }
+        } label: {
+            HStack(spacing: 12) {
+                Text(locale.rawValue.uppercased())
+                    .font(.system(size: 11, weight: .heavy, design: .monospaced))
+                    .foregroundStyle(active ? Cyber.bg : Cyber.cyan)
+                    .padding(.horizontal, 7).padding(.vertical, 3)
+                    .background(active ? Cyber.cyan : Color.clear)
+                    .overlay(Rectangle().stroke(Cyber.cyan.opacity(active ? 0 : 0.6), lineWidth: 1))
+
+                Text(locale.displayName)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Cyber.text)
+
+                Spacer()
+
+                if active {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(Cyber.lime)
+                        Text("ACTIVE")
+                            .font(.system(size: 9, weight: .heavy, design: .monospaced))
+                            .foregroundStyle(Cyber.lime)
+                            .tracking(1.4)
                     }
                 }
             }
-            .navigationTitle(Text("Language"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(L10n.close) { dismiss() } } }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Cyber.surface.opacity(0.85))
+            .overlay(Rectangle().stroke(active ? Cyber.cyan : Cyber.cyan.opacity(0.3), lineWidth: active ? 1.5 : 1))
+            .shadow(color: active ? Cyber.cyan.opacity(0.4) : .clear, radius: 4)
         }
-        .presentationDetents([.medium])
+        .buttonStyle(.plain)
     }
 }

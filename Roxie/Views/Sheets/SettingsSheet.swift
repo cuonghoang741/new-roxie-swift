@@ -138,53 +138,47 @@ struct SettingsSheet: View {
     private var profileCard: some View {
         HStack(spacing: 14) {
             ZStack {
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [Color(hex: "#FF5CA8"), Color(hex: "#FF2D79")],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
+                HexagonShape().fill(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .topLeading, endPoint: .bottomTrailing))
+                HexagonShape().stroke(Cyber.cyan.opacity(0.7), lineWidth: 1)
                 Text(initialLetter)
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
+                    .font(Cyber.mono(22, weight: .heavy))
+                    .foregroundStyle(Cyber.bg)
             }
-            .frame(width: 56, height: 56)
+            .frame(width: 60, height: 68)
+            .shadow(color: Cyber.cyan.opacity(0.6), radius: 8)
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 8) {
-                    Text(displayName)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(.white)
-                    if isPro {
-                        Text("PRO")
-                            .font(.system(size: 10, weight: .heavy))
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(
-                                LinearGradient(colors: [Color(hex: "#FFD91B"), Color(hex: "#FFE979")], startPoint: .leading, endPoint: .trailing)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    } else {
-                        Text("FREE")
-                            .font(.system(size: 10, weight: .heavy))
-                            .foregroundStyle(.white.opacity(0.7))
-                            .padding(.horizontal, 6).padding(.vertical, 2)
-                            .background(Color.white.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    }
+                    Text(displayName.uppercased())
+                        .font(Cyber.mono(15, weight: .heavy))
+                        .foregroundStyle(Cyber.text)
+                        .tracking(1.2)
+                        .lineLimit(1)
+                    Text(isPro ? "PRO" : "FREE")
+                        .font(Cyber.mono(9, weight: .heavy))
+                        .foregroundStyle(isPro ? Cyber.bg : Cyber.cyan)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(isPro ? AnyView(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing)) : AnyView(Color.clear))
+                        .overlay(Rectangle().stroke(Cyber.cyan.opacity(isPro ? 0 : 0.7), lineWidth: 1))
+                        .tracking(1.4)
                 }
-                Text(emailText)
-                    .font(.system(size: 13))
-                    .foregroundStyle(.white.opacity(0.55))
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    Text("[ID]")
+                        .font(Cyber.mono(9, weight: .heavy))
+                        .foregroundStyle(Cyber.cyan.opacity(0.6))
+                        .tracking(1)
+                    Text(emailText)
+                        .font(Cyber.mono(11, weight: .semibold))
+                        .foregroundStyle(Cyber.textDim)
+                        .lineLimit(1)
+                }
             }
             Spacer()
         }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.06))
-        )
+        .padding(14)
+        .background(Cyber.surface.opacity(0.85))
+        .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.4), lineWidth: 1))
+        .overlay(CornerBrackets(tint: Cyber.cyan, size: 8))
         .padding(.horizontal, 16)
     }
 
@@ -199,32 +193,28 @@ struct SettingsSheet: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "diamond.fill")
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundStyle(.white)
+                    .font(.system(size: 22, weight: .heavy))
+                    .foregroundStyle(Cyber.bg)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(isPro ? "Bonie Pro Active" : "Upgrade to Bonie Pro")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                    Text(isPro ? "Enjoying full access" : "Unlock everything")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.white.opacity(0.85))
+                    Text(isPro ? "PRO//ACTIVE" : "INITIALIZE PRO")
+                        .font(Cyber.mono(14, weight: .heavy))
+                        .foregroundStyle(Cyber.bg)
+                        .tracking(1.4)
+                    Text(isPro ? "FULL_ACCESS = TRUE" : "UNLOCK_ALL = FALSE")
+                        .font(Cyber.mono(10, weight: .semibold))
+                        .foregroundStyle(Cyber.bg.opacity(0.7))
+                        .tracking(1)
                 }
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(Cyber.bg)
             }
-            .padding(16)
-            .background(
-                LinearGradient(
-                    colors: isPro
-                        ? [Color(hex: "#FF4081"), Color(hex: "#F50057")]
-                        : [Color(hex: "#FF5D9D"), Color(hex: "#FF2D79")],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(14)
+            .background(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .overlay(CornerBrackets(tint: Cyber.bg.opacity(0.4), size: 8))
+            .shadow(color: Cyber.magenta.opacity(0.6), radius: 10)
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 16)
@@ -235,15 +225,20 @@ struct SettingsSheet: View {
     @ViewBuilder
     private func sectionGroup<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.4))
-                .padding(.horizontal, 16)
+            HStack(spacing: 6) {
+                Text("//")
+                    .font(Cyber.mono(10, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                Text(title.uppercased())
+                    .font(Cyber.mono(10, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
+                    .tracking(1.6)
+                ScanLine(tint: Cyber.cyan).frame(maxWidth: 80)
+            }
+            .padding(.horizontal, 16)
             VStack(spacing: 0) { content() }
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.white.opacity(0.05))
-                )
+                .background(Cyber.surface.opacity(0.78))
+                .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.3), lineWidth: 1))
                 .padding(.horizontal, 16)
         }
     }
@@ -276,14 +271,15 @@ private struct SettingsRow<Trailing: View>: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 iconBubble(systemName: icon, tint: iconTint)
-                Text(label)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.white)
+                Text(label.uppercased())
+                    .font(Cyber.mono(12, weight: .semibold))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1)
                 Spacer()
                 trailing()
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.3))
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan.opacity(0.5))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
@@ -302,13 +298,14 @@ private struct SettingsLinkRow: View {
         Link(destination: url) {
             HStack(spacing: 12) {
                 iconBubble(systemName: icon, tint: iconTint)
-                Text(label)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.white)
+                Text(label.uppercased())
+                    .font(Cyber.mono(12, weight: .semibold))
+                    .foregroundStyle(Cyber.text)
+                    .tracking(1)
                 Spacer()
                 Image(systemName: "arrow.up.right.square")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.3))
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan.opacity(0.5))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
@@ -325,13 +322,14 @@ private struct SettingsToggleRow: View {
     var body: some View {
         HStack(spacing: 12) {
             iconBubble(systemName: icon, tint: iconTint)
-            Text(label)
-                .font(.system(size: 15))
-                .foregroundStyle(.white)
+            Text(label.uppercased())
+                .font(Cyber.mono(12, weight: .semibold))
+                .foregroundStyle(Cyber.text)
+                .tracking(1)
             Spacer()
             Toggle("", isOn: $isOn)
                 .labelsHidden()
-                .tint(Color(hex: "#FF5CA8"))
+                .tint(Cyber.cyan)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -341,13 +339,12 @@ private struct SettingsToggleRow: View {
 @ViewBuilder
 private func iconBubble(systemName: String, tint: Color) -> some View {
     Image(systemName: systemName)
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(.white)
-        .frame(width: 30, height: 30)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(tint)
-        )
+        .font(.system(size: 12, weight: .heavy))
+        .foregroundStyle(tint)
+        .frame(width: 28, height: 28)
+        .background(tint.opacity(0.15))
+        .overlay(Rectangle().stroke(tint.opacity(0.6), lineWidth: 1))
+        .shadow(color: tint.opacity(0.5), radius: 4)
 }
 
 // MARK: - Edit profile sub-sheet
@@ -360,61 +357,115 @@ struct EditProfileSheet: View {
     @State private var showDeleteConfirm = false
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Profile") {
-                    TextField("Display name", text: $name)
-                        .textInputAutocapitalization(.words)
-                        .submitLabel(.done)
-                        .onSubmit { saveName() }
-                    HStack {
-                        Text("Email")
-                        Spacer()
-                        Text(auth.user?.email ?? "—").foregroundStyle(.secondary)
+        CyberSheetChrome(title: "Profile_Edit", subtitle: "User // Mutate", tint: Cyber.cyan) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    cyberFieldGroup(label: "DISPLAY_NAME") {
+                        TextField("", text: $name, prompt: Text("ALIAS").font(Cyber.mono(13)).foregroundColor(Cyber.textDim))
+                            .textInputAutocapitalization(.words)
+                            .submitLabel(.done)
+                            .onSubmit { saveName() }
+                            .font(Cyber.mono(14, weight: .semibold))
+                            .foregroundStyle(Cyber.text)
+                            .tint(Cyber.cyan)
+                            .padding(10)
                     }
-                }
-                Section {
-                    Button("Save", action: saveName)
-                        .disabled(saving || name.isEmpty)
-                }
-                Section {
-                    Button("Delete Account", role: .destructive) { showDeleteConfirm = true }
-                }
-            }
-            .navigationTitle("Edit Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(L10n.close) { dismiss() } } }
-            .onAppear {
-                if case let .string(value)? = auth.user?.userMetadata["display_name"] {
-                    name = value
-                }
-            }
-            .confirmationDialog(
-                "Delete your account? This permanently removes your data and cannot be undone.",
-                isPresented: $showDeleteConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("Delete Account", role: .destructive) {
-                    Task {
-                        await auth.deleteAccount()
-                        dismiss()
+
+                    cyberFieldGroup(label: "EMAIL") {
+                        Text(auth.user?.email ?? "—")
+                            .font(Cyber.mono(13, weight: .semibold))
+                            .foregroundStyle(Cyber.textDim)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
                     }
-                }
-                Button("Cancel", role: .cancel) {}
-            }
-            .overlay {
-                if auth.isLoading {
-                    ZStack {
-                        Color.black.opacity(0.4).ignoresSafeArea()
-                        VStack(spacing: 12) {
-                            ProgressView().tint(.white).scaleEffect(1.4)
-                            Text("Deleting account...")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(.white)
+
+                    Button(action: saveName) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill").font(.system(size: 14, weight: .heavy))
+                            Text("SAVE_PROFILE")
+                                .font(Cyber.mono(13, weight: .heavy))
+                                .tracking(1.4)
                         }
+                        .foregroundStyle(Cyber.bg)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(LinearGradient(colors: [Cyber.cyan, Cyber.violet], startPoint: .leading, endPoint: .trailing))
+                        .shadow(color: Cyber.cyan.opacity(0.6), radius: 8)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(saving || name.isEmpty)
+                    .opacity(name.isEmpty || saving ? 0.6 : 1)
+
+                    Spacer().frame(height: 12)
+
+                    Button { showDeleteConfirm = true } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "trash.fill").font(.system(size: 13, weight: .heavy))
+                            Text("DELETE_ACCOUNT")
+                                .font(Cyber.mono(12, weight: .heavy))
+                                .tracking(1.4)
+                            Spacer()
+                            Text("//IRREVERSIBLE")
+                                .font(Cyber.mono(9, weight: .heavy))
+                                .tracking(1.4)
+                        }
+                        .foregroundStyle(Cyber.danger)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(Cyber.danger.opacity(0.08))
+                        .overlay(Rectangle().stroke(Cyber.danger.opacity(0.6), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(16)
+            }
+            .scrollIndicators(.hidden)
+        }
+        .onAppear {
+            if case let .string(value)? = auth.user?.userMetadata["display_name"] {
+                name = value
+            }
+        }
+        .confirmationDialog(
+            "Delete your account? This permanently removes your data and cannot be undone.",
+            isPresented: $showDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Account", role: .destructive) {
+                Task {
+                    await auth.deleteAccount()
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .overlay {
+            if auth.isLoading {
+                ZStack {
+                    Cyber.bg.opacity(0.7).ignoresSafeArea()
+                    VStack(spacing: 10) {
+                        ProgressView().tint(Cyber.danger).scaleEffect(1.3)
+                        Text("// PURGING DATA")
+                            .font(Cyber.mono(11, weight: .heavy))
+                            .foregroundStyle(Cyber.danger)
+                            .tracking(1.6)
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func cyberFieldGroup<C: View>(label: String, @ViewBuilder content: () -> C) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("// \(label)")
+                .font(Cyber.mono(10, weight: .heavy))
+                .foregroundStyle(Cyber.cyan)
+                .tracking(1.4)
+            content()
+                .background(Cyber.surface.opacity(0.85))
+                .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.4), lineWidth: 1))
         }
     }
 
@@ -442,30 +493,72 @@ struct FeedbackSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Picker("Type", selection: $kind) {
-                    ForEach(Kind.allCases) { Text($0.rawValue).tag($0) }
-                }
-                .pickerStyle(.segmented)
-
-                Section("Tell us more") {
-                    TextEditor(text: $message)
-                        .frame(minHeight: 160)
-                }
-
-                Section {
-                    Button("Send") {
-                        // Native sends to Supabase feedback table; stub for now.
-                        Log.app.info("[feedback] \(kind.rawValue): \(message, privacy: .public)")
-                        dismiss()
+        CyberSheetChrome(title: "Feedback", subtitle: "Transmit // Report", tint: Cyber.violet) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 0) {
+                    ForEach(Kind.allCases) { k in
+                        Button { kind = k } label: {
+                            Text(k == .problem ? "BUG_REPORT" : "FEATURE_REQ")
+                                .font(Cyber.mono(11, weight: .heavy))
+                                .tracking(1.4)
+                                .foregroundStyle(kind == k ? Cyber.bg : Cyber.violet)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(kind == k ? Cyber.violet : Color.clear)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .disabled(message.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
+                .background(Cyber.surface.opacity(0.85))
+                .overlay(Rectangle().stroke(Cyber.violet.opacity(0.5), lineWidth: 1))
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("// MESSAGE")
+                        .font(Cyber.mono(10, weight: .heavy))
+                        .foregroundStyle(Cyber.violet)
+                        .tracking(1.4)
+                    ZStack(alignment: .topLeading) {
+                        if message.isEmpty {
+                            Text("Tell us more...")
+                                .font(Cyber.mono(13))
+                                .foregroundStyle(Cyber.textDim)
+                                .padding(.horizontal, 14).padding(.vertical, 12)
+                        }
+                        TextEditor(text: $message)
+                            .scrollContentBackground(.hidden)
+                            .font(Cyber.mono(13, weight: .semibold))
+                            .foregroundStyle(Cyber.text)
+                            .tint(Cyber.violet)
+                            .padding(8)
+                    }
+                    .frame(minHeight: 180)
+                    .background(Cyber.surface.opacity(0.85))
+                    .overlay(Rectangle().stroke(Cyber.violet.opacity(0.45), lineWidth: 1))
+                }
+
+                Button {
+                    Log.app.info("[feedback] \(kind.rawValue): \(message, privacy: .public)")
+                    dismiss()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "paperplane.fill").font(.system(size: 13, weight: .heavy))
+                        Text("TRANSMIT")
+                            .font(Cyber.mono(13, weight: .heavy))
+                            .tracking(1.6)
+                    }
+                    .foregroundStyle(Cyber.bg)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(LinearGradient(colors: [Cyber.violet, Cyber.magenta], startPoint: .leading, endPoint: .trailing))
+                    .shadow(color: Cyber.violet.opacity(0.6), radius: 8)
+                }
+                .buttonStyle(.plain)
+                .disabled(message.trimmingCharacters(in: .whitespaces).isEmpty)
+                .opacity(message.trimmingCharacters(in: .whitespaces).isEmpty ? 0.6 : 1)
+
+                Spacer()
             }
-            .navigationTitle("Feedback")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button(L10n.close) { dismiss() } } }
+            .padding(16)
         }
     }
 }

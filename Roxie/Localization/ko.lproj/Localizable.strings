@@ -90,3 +90,127 @@
 /* Errors */
 "error.load" = "데이터를 불러올 수 없습니다";
 "error.network" = "네트워크 오류";
+
+/* Cyber HUD */
+"cyber.online" = "온라인";
+"cyber.live" = "라이브//";
+"cyber.connecting" = "연결 중";
+"cyber.establishing_link" = "//연결 설정 중";
+"cyber.booting" = "부팅 중 //";
+"cyber.initializing" = "초기화 중";
+
+"cyber.action.capture" = "촬영";
+"cyber.action.send" = "전송";
+"cyber.action.dance" = "댄스";
+"cyber.action.stop" = "정지";
+"cyber.action.end" = "종료";
+
+"cyber.input_placeholder" = "전송 내용";
+
+"cyber.sheet.companions" = "동반자";
+"cyber.sheet.companions_sub" = "선택 // %d명";
+"cyber.sheet.environments" = "배경";
+"cyber.sheet.environments_sub" = "장면 // %d";
+"cyber.sheet.outfits" = "의상";
+"cyber.sheet.outfits_sub" = "옷장 // %d";
+"cyber.sheet.choreo" = "안무";
+"cyber.sheet.choreo_sub" = "루틴 // %d";
+"cyber.sheet.vault" = "볼트";
+"cyber.sheet.vault_sub" = "전송 // %d개";
+"cyber.sheet.settings" = "설정";
+"cyber.sheet.language" = "언어";
+"cyber.sheet.language_sub" = "로케일 선택";
+"cyber.sheet.profile" = "프로필 편집";
+"cyber.sheet.profile_sub" = "사용자 // 변경";
+"cyber.sheet.feedback" = "피드백";
+"cyber.sheet.feedback_sub" = "전송 // 보고";
+"cyber.sheet.chat_log" = "채팅 로그";
+
+"cyber.stop_routine" = "정지 // 루틴";
+"cyber.pro_only" = "// PRO 전용";
+"cyber.pro_required" = "PRO_필요";
+"cyber.owned" = "보유";
+"cyber.free" = "무료";
+"cyber.empty_outfits" = "// 의상 없음";
+"cyber.empty_vault" = "// 볼트 비어있음";
+"cyber.log_empty" = "// 로그 없음";
+"cyber.load_more" = "더 보기 //";
+"cyber.loading_archive" = "// 아카이브 로딩 중";
+"cyber.loading_roster" = "// 로스터 로딩 중";
+"cyber.archive_count" = "아카이브 // %d개 항목";
+
+"cyber.sub.tier" = "[ 등급 ]";
+"cyber.sub.pro_unlimited" = "PRO.무제한";
+"cyber.sub.title_1" = "함께";
+"cyber.sub.title_2" = "끝까지//";
+"cyber.sub.title_3" = "무제한으로";
+"cyber.sub.perk_1" = "메시지 무제한";
+"cyber.sub.perk_2" = "독점 미디어 볼트";
+"cyber.sub.perk_3" = "월 30분 영상 통화";
+"cyber.sub.perk_4" = "동반자 15명+ 해제";
+"cyber.sub.perk_5" = "전체 의상 라이브러리";
+"cyber.sub.perk_6" = "전체 배경 라이브러리";
+"cyber.sub.annual" = "연간";
+"cyber.sub.monthly" = "월간";
+"cyber.sub.per_year" = "연간";
+"cyber.sub.per_month" = "월간";
+"cyber.sub.initialize" = "PRO 시작//";
+"cyber.sub.privacy" = "개인정보";
+"cyber.sub.restore" = "복원";
+"cyber.sub.terms" = "이용약관";
+
+"cyber.settings.account_section" = "계정";
+"cyber.settings.preferences_section" = "환경설정";
+"cyber.settings.legal_section" = "약관 및 지원";
+"cyber.settings.subscription" = "구독";
+"cyber.settings.edit_profile" = "프로필 편집";
+"cyber.settings.notifications" = "알림";
+"cyber.settings.auto_music" = "음악 자동 재생";
+"cyber.settings.haptics" = "햅틱";
+"cyber.settings.nsfw" = "NSFW 콘텐츠";
+"cyber.settings.language" = "언어";
+"cyber.settings.terms" = "이용약관";
+"cyber.settings.privacy" = "개인정보 처리방침";
+"cyber.settings.eula" = "EULA";
+"cyber.settings.rate" = "평가하기";
+"cyber.settings.report" = "문제 신고";
+"cyber.settings.pro_active" = "PRO//활성";
+"cyber.settings.init_pro" = "PRO 시작";
+"cyber.settings.full_access" = "FULL_ACCESS = TRUE";
+"cyber.settings.unlock_false" = "UNLOCK_ALL = FALSE";
+"cyber.settings.delete_account" = "계정 삭제";
+"cyber.settings.irreversible" = "//복구 불가";
+"cyber.settings.purging" = "// 데이터 삭제 중";
+"cyber.settings.save_profile" = "프로필 저장";
+"cyber.settings.alias" = "닉네임";
+"cyber.settings.email" = "이메일";
+
+"cyber.feedback.bug" = "버그 신고";
+"cyber.feedback.feature" = "기능 요청";
+"cyber.feedback.placeholder" = "자세히 알려주세요…";
+"cyber.feedback.transmit" = "전송";
+
+"cyber.onboard.welcome" = "//환영합니다";
+"cyber.onboard.customize" = "//커스터마이즈";
+"cyber.onboard.connect" = "//연결";
+"cyber.onboard.welcome_body" = "Bonie가 당신만의 프라이빗 동반자를 초기화합니다.";
+"cyber.onboard.customize_body" = "의상, 배경, 안무를 즉시 전환하세요.";
+"cyber.onboard.connect_body" = "언제 어디서나 채팅과 통화가 가능합니다.";
+"cyber.onboard.skip" = "건너뛰기 //";
+"cyber.onboard.next" = "다음 //";
+"cyber.onboard.initialize" = "시작 //";
+
+"cyber.gift.title" = "//환영 패키지";
+"cyber.gift.claim" = "에어드롭 받기 //";
+
+"cyber.profile.setup" = "[ 프로필 설정 ]";
+"cyber.profile.identify" = "//식별";
+"cyber.profile.enter_alias" = "닉네임 입력";
+"cyber.profile.birth_hint" = "YYYY";
+"cyber.profile.finalize" = "완료 //";
+"cyber.profile.companion_linked" = "// 동반자 연결됨";
+
+"cyber.char.select" = "선택 //";
+"cyber.char.preview" = "미리보기 //";
+"cyber.char.companions" = "// 동반자";
+"cyber.char.select_partner" = "파트너 선택";

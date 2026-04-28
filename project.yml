@@ -40,9 +40,7 @@ targets:
         CFBundleVersion: "1"
         CFBundleLocalizations:
           - en
-          - vi
           - ja
-          - fr
           - ko
         CFBundleDevelopmentRegion: en
         UILaunchScreen:

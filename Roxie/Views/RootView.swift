@@ -30,16 +30,7 @@ struct RootView: View {
     }
 
     private var launchView: some View {
-        ZStack {
-            LinearGradient(colors: [Palette.Brand.s200, Palette.Brand.s500], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
-            VStack(spacing: 12) {
-                Image(systemName: "heart.circle.fill")
-                    .resizable().scaledToFit().frame(width: 80, height: 80)
-                    .foregroundStyle(.white)
-                ProgressView().tint(.white)
-            }
-        }
+        CyberLaunchView()
     }
 
     // Match the RN condition: `hasRestoredSession && !session`.
