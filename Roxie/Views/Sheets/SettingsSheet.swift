@@ -136,49 +136,57 @@ struct SettingsSheet: View {
     // MARK: - Profile card
 
     private var profileCard: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                HexagonShape().fill(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .topLeading, endPoint: .bottomTrailing))
-                HexagonShape().stroke(Cyber.cyan.opacity(0.7), lineWidth: 1)
-                Text(initialLetter)
-                    .font(Cyber.mono(22, weight: .heavy))
-                    .foregroundStyle(Cyber.bg)
-            }
-            .frame(width: 60, height: 68)
-            .shadow(color: Cyber.cyan.opacity(0.6), radius: 8)
+        Button {
+            showEditProfile = true
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    HexagonShape().fill(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    HexagonShape().stroke(Cyber.cyan.opacity(0.7), lineWidth: 1)
+                    Text(initialLetter)
+                        .font(Cyber.mono(22, weight: .heavy))
+                        .foregroundStyle(Cyber.bg)
+                }
+                .frame(width: 60, height: 68)
+                .shadow(color: Cyber.cyan.opacity(0.6), radius: 8)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 8) {
-                    Text(displayName.uppercased())
-                        .font(Cyber.mono(15, weight: .heavy))
-                        .foregroundStyle(Cyber.text)
-                        .tracking(1.2)
-                        .lineLimit(1)
-                    Text(isPro ? "PRO" : "FREE")
-                        .font(Cyber.mono(9, weight: .heavy))
-                        .foregroundStyle(isPro ? Cyber.bg : Cyber.cyan)
-                        .padding(.horizontal, 6).padding(.vertical, 2)
-                        .background(isPro ? AnyView(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing)) : AnyView(Color.clear))
-                        .overlay(Rectangle().stroke(Cyber.cyan.opacity(isPro ? 0 : 0.7), lineWidth: 1))
-                        .tracking(1.4)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 8) {
+                        Text(displayName.uppercased())
+                            .font(Cyber.mono(15, weight: .heavy))
+                            .foregroundStyle(Cyber.text)
+                            .tracking(1.2)
+                            .lineLimit(1)
+                        Text(isPro ? "PRO" : "FREE")
+                            .font(Cyber.mono(9, weight: .heavy))
+                            .foregroundStyle(isPro ? Cyber.bg : Cyber.cyan)
+                            .padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(isPro ? AnyView(LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing)) : AnyView(Color.clear))
+                            .overlay(Rectangle().stroke(Cyber.cyan.opacity(isPro ? 0 : 0.7), lineWidth: 1))
+                            .tracking(1.4)
+                    }
+                    HStack(spacing: 6) {
+                        Text("[ID]")
+                            .font(Cyber.mono(9, weight: .heavy))
+                            .foregroundStyle(Cyber.cyan.opacity(0.6))
+                            .tracking(1)
+                        Text(emailText)
+                            .font(Cyber.mono(11, weight: .semibold))
+                            .foregroundStyle(Cyber.textDim)
+                            .lineLimit(1)
+                    }
                 }
-                HStack(spacing: 6) {
-                    Text("[ID]")
-                        .font(Cyber.mono(9, weight: .heavy))
-                        .foregroundStyle(Cyber.cyan.opacity(0.6))
-                        .tracking(1)
-                    Text(emailText)
-                        .font(Cyber.mono(11, weight: .semibold))
-                        .foregroundStyle(Cyber.textDim)
-                        .lineLimit(1)
-                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(Cyber.cyan)
             }
-            Spacer()
+            .padding(14)
+            .background(Cyber.surface.opacity(0.85))
+            .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.4), lineWidth: 1))
+            .overlay(CornerBrackets(tint: Cyber.cyan, size: 8))
         }
-        .padding(14)
-        .background(Cyber.surface.opacity(0.85))
-        .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.4), lineWidth: 1))
-        .overlay(CornerBrackets(tint: Cyber.cyan, size: 8))
+        .buttonStyle(.plain)
         .padding(.horizontal, 16)
     }
 

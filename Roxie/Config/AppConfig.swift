@@ -2,21 +2,42 @@ import Foundation
 
 enum AppConfig {
     static let supabaseURL = URL(string: ProcessInfo.processInfo.environment["SUPABASE_URL"]
-        ?? "https://cjtghurczxqheqwegpiy.supabase.co")!
+        ?? "https://nysfrunajmmaoqtppowb.supabase.co")!
 
     static let supabaseAnonKey = ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"]
-        ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNqdGdodXJjenhxaGVxd2VncGl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzODAwMTAsImV4cCI6MjA3ODk1NjAxMH0.l2IvbVrPipNQpGxQrRNCBRDfxyZCOO756PNFABYPOCQ"
+        ?? "sb_publishable_MttiEDMo_A6uxEBx1sqkhg_qX6y79sy"
 
-    static let appScheme = "roxieswift"
+    static let appScheme = "bonie"
     static let authRedirectPath = "auth/callback"
     static var authRedirectURL: URL {
         URL(string: "\(appScheme)://\(authRedirectPath)")!
     }
 
+    /// RevenueCat public iOS API key. Get from RevenueCat dashboard →
+    /// Project Settings → API keys → "Public app-specific" (iOS), prefix `appl_`.
+    /// Override at run-time via env var `REVENUECAT_API_KEY` for builds without
+    /// the key baked in.
+    static let revenueCatAPIKey = ProcessInfo.processInfo.environment["REVENUECAT_API_KEY"]
+        ?? "appl_aCCQNfQZVWWNlqjWANUqDSeeKxj"
+
+    /// RevenueCat entitlement identifier that gates Pro features. Must match
+    /// the entitlement name configured in the RevenueCat dashboard exactly,
+    /// including casing and any whitespace.
+    static let revenueCatProEntitlement = "Bonie Pro"
+
+    /// App Store product identifiers for the Pro subscription. Configured in
+    /// App Store Connect and linked into the RevenueCat default offering.
+    /// Used as a fallback lookup when the package identifier in the dashboard
+    /// isn't `$rc_annual` / `$rc_monthly`.
+    enum ProProductID {
+        static let yearly  = "bonie.pro.yearly"
+        static let monthly = "bonie.pro.monthly"
+    }
+
     enum Legal {
-        static let terms = URL(string: "https://roxie-terms-privacy-hub.lovable.app/terms")!
-        static let privacy = URL(string: "https://roxie-terms-privacy-hub.lovable.app/privacy")!
-        static let eula = URL(string: "https://roxie-terms-privacy-hub.lovable.app/eula")!
+        static let terms = URL(string: "https://bonie-pink-heart-web.lovable.app/terms")!
+        static let privacy = URL(string: "https://bonie-pink-heart-web.lovable.app/privacy")!
+        static let eula = URL(string: "https://bonie-pink-heart-web.lovable.app/eula")!
     }
 }
 

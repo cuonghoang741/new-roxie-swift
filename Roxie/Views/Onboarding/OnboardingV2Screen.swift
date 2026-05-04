@@ -151,14 +151,22 @@ struct OnboardingV2Screen: View {
     }
 
     private func save() async {
+        Log.app.info("[OnboardingV2] save() start — name='\(displayName, privacy: .public)' year='\(birthYear, privacy: .public)'")
         saving = true
         defer { saving = false }
         let trimmedName = displayName.trimmingCharacters(in: .whitespaces)
-        if !trimmedName.isEmpty { await auth.updateDisplayName(trimmedName) }
+        if !trimmedName.isEmpty {
+            Log.app.info("[OnboardingV2] updateDisplayName starting")
+            await auth.updateDisplayName(trimmedName)
+            Log.app.info("[OnboardingV2] updateDisplayName done")
+        }
         if let year = Int(birthYear.trimmingCharacters(in: .whitespaces)) {
+            Log.app.info("[OnboardingV2] updateBirthYear starting (\(year))")
             await auth.updateBirthYear(year)
+            Log.app.info("[OnboardingV2] updateBirthYear done")
         }
         UserPreferencesService.hasCompletedOnboardingV2 = true
+        Log.app.info("[OnboardingV2] save() complete — calling onFinish()")
         onFinish()
     }
 }

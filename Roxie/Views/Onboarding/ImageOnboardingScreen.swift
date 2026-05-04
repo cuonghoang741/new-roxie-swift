@@ -128,8 +128,10 @@ struct ImageOnboardingScreen: View {
     private var ctaButton: some View {
         Button {
             if page < slides.count - 1 {
+                Log.app.info("[ImageOnboarding] tap NEXT page \(page) -> \(page + 1)")
                 withAnimation(.easeInOut(duration: 0.3)) { page += 1 }
             } else {
+                Log.app.info("[ImageOnboarding] tap INITIALIZE — calling onFinish()")
                 onFinish()
             }
         } label: {

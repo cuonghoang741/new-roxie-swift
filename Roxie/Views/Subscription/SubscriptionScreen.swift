@@ -1,25 +1,82 @@
 import SwiftUI
 import AVKit
 import Combine
+import RevenueCat
 
 struct SubscriptionScreen: View {
     var onClose: () -> Void
 
     @Environment(VRMContext.self) private var vrm
+    @State private var rc = RevenueCatManager.shared
     @State private var selectedPlan: Plan = .yearly
     @State private var player: AVPlayer?
-    @State private var isProcessing = false
     @State private var playerReady: Bool = false
     @State private var statusCancellable: AnyCancellable?
     @State private var browserURL: URL?
+    @State private var loadingOfferings: Bool = false
+    @State private var purchaseAlert: PurchaseAlert?
 
-    enum Plan: Hashable {
-        case yearly, monthly
-        var name: String { self == .yearly ? "ANNUAL" : "MONTHLY" }
-        var priceString: String { self == .yearly ? "$59.99" : "$9.99" }
-        var period: String { self == .yearly ? "PER YEAR" : "PER MONTH" }
-        var subDetail: String? { self == .yearly ? "$5.00 / mo" : nil }
-        var code: String { self == .yearly ? "PRO.A" : "PRO.M" }
+    enum Plan: Hashable { case yearly, monthly }
+
+    struct PurchaseAlert: Identifiable {
+        let id = UUID()
+        let title: String
+        let message: String
+    }
+
+    private var yearlyPackage: Package? {
+        guard let off = rc.currentOffering else { return nil }
+        return off.availablePackages.first { $0.storeProduct.productIdentifier == AppConfig.ProProductID.yearly }
+            ?? off.annual
+            ?? off.availablePackages.first { $0.packageType == .annual }
+            ?? off.availablePackages.first { matchesYearly($0) }
+    }
+
+    private var monthlyPackage: Package? {
+        guard let off = rc.currentOffering else { return nil }
+        return off.availablePackages.first { $0.storeProduct.productIdentifier == AppConfig.ProProductID.monthly }
+            ?? off.monthly
+            ?? off.availablePackages.first { $0.packageType == .monthly }
+            ?? off.availablePackages.first { matchesMonthly($0) }
+    }
+
+    /// Loose match for "yearly/annual" — covers Test Store / mis-tagged dashboards
+    /// (e.g. RevenueCat's Test Store sometimes ships annual products under
+    /// `$rc_lifetime` packages with productID just `yearly`).
+    private func matchesYearly(_ p: Package) -> Bool {
+        let pid = p.storeProduct.productIdentifier.lowercased()
+        let id = p.identifier.lowercased()
+        return pid.contains("year") || pid.contains("annual")
+            || id.contains("year") || id.contains("annual")
+    }
+    private func matchesMonthly(_ p: Package) -> Bool {
+        let pid = p.storeProduct.productIdentifier.lowercased()
+        let id = p.identifier.lowercased()
+        return pid.contains("month") || id.contains("month")
+    }
+
+    private var selectedPackage: Package? {
+        selectedPlan == .yearly ? yearlyPackage : monthlyPackage
+    }
+
+    private func priceString(for plan: Plan) -> String {
+        let pkg = plan == .yearly ? yearlyPackage : monthlyPackage
+        return pkg?.storeProduct.localizedPriceString ?? (plan == .yearly ? "$59.99" : "$9.99")
+    }
+
+    private func planCode(for plan: Plan) -> String { plan == .yearly ? "PRO.A" : "PRO.M" }
+    private func planName(for plan: Plan) -> String { plan == .yearly ? "ANNUAL" : "MONTHLY" }
+    private func planPeriod(for plan: Plan) -> String { plan == .yearly ? "PER YEAR" : "PER MONTH" }
+    private func planSubDetail(for plan: Plan) -> String? {
+        guard plan == .yearly, let pkg = yearlyPackage else { return nil }
+        // Show approximate per-month equivalent (annual price ÷ 12).
+        let price = pkg.storeProduct.price as Decimal
+        let perMonth = NSDecimalNumber(decimal: price / 12)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = pkg.storeProduct.priceFormatter?.locale ?? .current
+        formatter.currencyCode = pkg.storeProduct.currencyCode
+        return formatter.string(from: perMonth).map { "\($0) / mo" }
     }
 
     private let perks: [(systemImage: String, text: String)] = [
@@ -41,9 +98,12 @@ struct SubscriptionScreen: View {
         return defaultVideoURL
     }
     private var discountText: String? {
-        let monthly = 9.99 * 12.0
-        let yearly = 59.99
-        let pct = Int(((monthly - yearly) / monthly) * 100)
+        guard let yearly = yearlyPackage, let monthly = monthlyPackage else { return nil }
+        let monthlyAnnualized = (monthly.storeProduct.price as Decimal) * 12
+        let yearlyPrice = yearly.storeProduct.price as Decimal
+        guard monthlyAnnualized > 0 else { return nil }
+        let savedFraction = (monthlyAnnualized - yearlyPrice) / monthlyAnnualized
+        let pct = Int((savedFraction as NSDecimalNumber).doubleValue * 100)
         return pct > 0 ? "-\(pct)%" : nil
     }
 
@@ -61,52 +121,69 @@ struct SubscriptionScreen: View {
                 bottomDeck
             }
         }
-        .onAppear { setupPlayer() }
+        .onAppear {
+            setupPlayer()
+            Task {
+                loadingOfferings = true
+                await rc.fetchOfferings()
+                loadingOfferings = false
+            }
+        }
         .onChange(of: vrm.currentCharacter?.id) { _, _ in setupPlayer() }
         .onChange(of: vrm.currentCostume?.id) { _, _ in setupPlayer() }
+        .onChange(of: rc.isProUser) { _, isPro in
+            // Auto-dismiss if the user becomes Pro (purchase or restore).
+            if isPro { onClose() }
+        }
         .onDisappear { player?.pause(); player = nil }
         .preferredColorScheme(.dark)
         .inAppBrowser(url: $browserURL)
+        .alert(item: $purchaseAlert) { a in
+            Alert(title: Text(a.title), message: Text(a.message), dismissButton: .default(Text("OK")))
+        }
     }
 
     // MARK: - Layers
 
     private var videoBackdrop: some View {
-        ZStack(alignment: .bottom) {
-            // Layer 1: poster image as backdrop while video loads.
-            if let img = heroCharacter?.thumbnailUrl ?? heroCharacter?.avatar,
-               let url = URL(string: img) {
-                AsyncImage(url: url) { image in
-                    image.resizable().aspectRatio(contentMode: .fill)
-                } placeholder: {
+        GeometryReader { geo in
+            ZStack {
+                // Layer 1: poster image as backdrop while video loads.
+                if let img = heroCharacter?.thumbnailUrl ?? heroCharacter?.avatar,
+                   let url = URL(string: img) {
+                    AsyncImage(url: url) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Cyber.bg
+                    }
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .id(heroCharacter?.id)
+                    .transition(.opacity)
+                } else {
                     Cyber.bg
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 540)
-                .clipped()
-                .id(heroCharacter?.id)
-                .transition(.opacity)
-            } else {
-                Cyber.bg.frame(height: 540)
-            }
 
-            // Layer 2: video, only shown once first frame is ready.
-            if let player, playerReady {
-                FillVideoPlayer(player: player)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 540)
-                    .clipped()
-                    .transition(.opacity)
-                    .allowsHitTesting(false)
-            }
+                // Layer 2: video covers the whole screen once the first frame is ready.
+                if let player, playerReady {
+                    FillVideoPlayer(player: player)
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .clipped()
+                        .transition(.opacity)
+                        .allowsHitTesting(false)
+                }
 
-            LinearGradient(
-                colors: [.clear, Cyber.bg.opacity(0.4), Cyber.bg, Cyber.bg],
-                startPoint: .top, endPoint: .bottom
-            )
-            .frame(height: 540)
+                // Bottom-up dark gradient so the deck content stays legible
+                // while the hero image/video bleeds full-screen behind it.
+                LinearGradient(
+                    colors: [.clear, .clear, Cyber.bg.opacity(0.55), Cyber.bg.opacity(0.95)],
+                    startPoint: .top, endPoint: .bottom
+                )
+                .frame(width: geo.size.width, height: geo.size.height)
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.25), value: playerReady)
     }
@@ -221,25 +298,27 @@ struct SubscriptionScreen: View {
     private var planBlock: some View {
         HStack(spacing: 10) {
             CyberPlanCard(
-                code: Plan.yearly.code,
-                name: Plan.yearly.name,
-                price: Plan.yearly.priceString,
-                period: Plan.yearly.period,
-                subDetail: Plan.yearly.subDetail,
+                code: planCode(for: .yearly),
+                name: planName(for: .yearly),
+                price: priceString(for: .yearly),
+                period: planPeriod(for: .yearly),
+                subDetail: planSubDetail(for: .yearly),
                 badge: discountText,
                 tint: Cyber.magenta,
                 isSelected: selectedPlan == .yearly,
+                isLoading: loadingOfferings && yearlyPackage == nil,
                 onTap: { selectedPlan = .yearly }
             )
             CyberPlanCard(
-                code: Plan.monthly.code,
-                name: Plan.monthly.name,
-                price: Plan.monthly.priceString,
-                period: Plan.monthly.period,
+                code: planCode(for: .monthly),
+                name: planName(for: .monthly),
+                price: priceString(for: .monthly),
+                period: planPeriod(for: .monthly),
                 subDetail: nil,
                 badge: nil,
                 tint: Cyber.cyan,
                 isSelected: selectedPlan == .monthly,
+                isLoading: loadingOfferings && monthlyPackage == nil,
                 onTap: { selectedPlan = .monthly }
             )
         }
@@ -247,16 +326,11 @@ struct SubscriptionScreen: View {
 
     private var ctaBlock: some View {
         Button {
-            isProcessing = true
-            Task {
-                try? await Task.sleep(nanoseconds: 600_000_000)
-                isProcessing = false
-                onClose()
-            }
+            handlePurchase()
         } label: {
             ZStack {
                 LinearGradient(colors: [Cyber.cyan, Cyber.magenta], startPoint: .leading, endPoint: .trailing)
-                if isProcessing {
+                if rc.isPurchasing {
                     ProgressView().tint(Cyber.bg)
                 } else {
                     HStack(spacing: 10) {
@@ -272,17 +346,45 @@ struct SubscriptionScreen: View {
             .clipShape(RoundedRectangle(cornerRadius: 4))
             .shadow(color: Cyber.magenta.opacity(0.7), radius: 10)
         }
-        .disabled(isProcessing)
-        .opacity(isProcessing ? 0.7 : 1)
+        .disabled(rc.isPurchasing || selectedPackage == nil)
+        .opacity((rc.isPurchasing || selectedPackage == nil) ? 0.55 : 1)
     }
 
     private var footerLinks: some View {
         HStack(spacing: 12) {
             Button { browserURL = AppConfig.Legal.privacy } label: { footerText(L10n.Cyber.subPrivacy) }
             Text("//").font(Cyber.mono(10, weight: .heavy)).foregroundStyle(Cyber.cyan.opacity(0.5))
-            Button { } label: { footerText(L10n.Cyber.subRestore) }
+            Button { handleRestore() } label: { footerText(L10n.Cyber.subRestore) }
+                .disabled(rc.isPurchasing)
             Text("//").font(Cyber.mono(10, weight: .heavy)).foregroundStyle(Cyber.cyan.opacity(0.5))
             Button { browserURL = AppConfig.Legal.terms } label: { footerText(L10n.Cyber.subTerms) }
+        }
+    }
+
+    private func handlePurchase() {
+        guard let package = selectedPackage else {
+            purchaseAlert = .init(title: "Unavailable", message: "Subscription plans are still loading. Please try again in a moment.")
+            return
+        }
+        Task {
+            let success = await rc.purchase(package: package)
+            if !success, let err = rc.lastError {
+                purchaseAlert = .init(title: "Purchase failed", message: err)
+            }
+            // Success path closes the screen via onChange(of: rc.isProUser).
+        }
+    }
+
+    private func handleRestore() {
+        Task {
+            let restored = await rc.restorePurchases()
+            if restored {
+                purchaseAlert = .init(title: "Restored", message: "Your Pro subscription is now active.")
+            } else if let err = rc.lastError {
+                purchaseAlert = .init(title: "Restore failed", message: err)
+            } else {
+                purchaseAlert = .init(title: "Nothing to restore", message: "No active subscription was found on this Apple ID.")
+            }
         }
     }
 
@@ -328,6 +430,7 @@ private struct CyberPlanCard: View {
     let badge: String?
     let tint: Color
     let isSelected: Bool
+    var isLoading: Bool = false
     let onTap: () -> Void
 
     var body: some View {
@@ -351,9 +454,15 @@ private struct CyberPlanCard: View {
                     .font(Cyber.mono(13, weight: .heavy))
                     .foregroundStyle(Cyber.text)
                     .tracking(1.2)
-                Text(price)
-                    .font(.system(size: 24, weight: .black))
-                    .foregroundStyle(Cyber.text)
+                if isLoading {
+                    ProgressView()
+                        .tint(tint)
+                        .frame(height: 28)
+                } else {
+                    Text(price)
+                        .font(.system(size: 24, weight: .black))
+                        .foregroundStyle(Cyber.text)
+                }
                 Text(period)
                     .font(Cyber.mono(9, weight: .semibold))
                     .foregroundStyle(Cyber.textDim)

@@ -3,31 +3,9 @@ import Foundation
 /// Placeholder wrappers for the 3rd-party SDKs the RN app talks to. They
 /// currently log only so the Swift port compiles + runs without pulling in
 /// the real SDKs. Swap each `log(…)` call with the real SDK invocation when
-/// you wire up RevenueCat / OneSignal / Firebase / AppsFlyer / Facebook.
+/// you wire up OneSignal / Firebase / AppsFlyer / Facebook.
 
-final class RevenueCatManager {
-    static let shared = RevenueCatManager()
-    private init() {}
-
-    private(set) var isProUser: Bool = false
-
-    func configure(userId: String?) {
-        Log.app.info("[revenuecat] configure(userId: \(userId ?? "anon", privacy: .public))")
-    }
-
-    func login(userId: String) async {
-        Log.app.info("[revenuecat] login \(userId, privacy: .public)")
-    }
-
-    func logout() async {
-        Log.app.info("[revenuecat] logout")
-        isProUser = false
-    }
-
-    func refreshSubscriptionStatus() async {
-        // Real impl: query Purchases.shared.getCustomerInfo()
-    }
-}
+// RevenueCatManager moved to its own file: Services/RevenueCatManager.swift
 
 final class OneSignalService {
     static let shared = OneSignalService()

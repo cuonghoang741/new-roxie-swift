@@ -162,14 +162,42 @@ final class VRMContext {
         hasAppliedInitialModel = true
     }
 
+    /// Pick the character to show first.
+    ///
+    /// Priority:
+    /// 1. The id we wrote to local storage on the previous run (`Persistence.characterId`).
+    /// 2. The first character the user actually OWNS on the server — covers
+    ///    fresh installs of an existing account where local Persistence is
+    ///    empty but the user has bonded with characters before.
+    /// 3. The first character in the catalog (only really hits for brand-new
+    ///    accounts that haven't claimed anything yet — those should be sent
+    ///    through the New User Gift flow by `RootView.needsNewUserGift`).
     private func ensureDefaultSelection() {
-        if currentCharacter == nil,
-           let persistedId = Persistence.characterId,
+        if currentCharacter != nil { return }
+
+        // 1. Local persisted selection
+        if let persistedId = Persistence.characterId,
            let match = initialData.characters.first(where: { $0.id == persistedId }) {
             currentCharacter = match
+            Log.app.info("ensureDefaultSelection: using persisted characterId=\(persistedId, privacy: .public)")
+            return
         }
-        if currentCharacter == nil {
-            currentCharacter = initialData.characters.first
+
+        // 2. First server-side owned character
+        if let ownedId = initialData.ownedCharacterIds.first(where: { id in
+                initialData.characters.contains(where: { $0.id == id })
+           }),
+           let match = initialData.characters.first(where: { $0.id == ownedId }) {
+            currentCharacter = match
+            Persistence.characterId = match.id
+            Log.app.info("ensureDefaultSelection: restoring owned character \(match.id, privacy: .public) (\(match.name ?? "?", privacy: .public)) from server")
+            return
+        }
+
+        // 3. Catalog fallback for users who haven't claimed anything
+        currentCharacter = initialData.characters.first
+        if let c = currentCharacter {
+            Log.app.info("ensureDefaultSelection: falling back to catalog first \(c.id, privacy: .public)")
         }
     }
 }

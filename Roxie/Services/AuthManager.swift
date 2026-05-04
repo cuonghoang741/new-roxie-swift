@@ -14,19 +14,15 @@ final class AuthManager: NSObject {
     private(set) var hasRestoredSession: Bool = false
     private(set) var isDeletingAccount: Bool = false
     private(set) var isNewUser: Bool?
-    /// Whether the user has explicitly chosen to continue as guest. We use
-    /// this (rather than "clientId exists") to decide if the sign-in screen
-    /// should be shown — otherwise we'd bypass sign-in on the very first
-    /// launch because a clientId is minted eagerly for Supabase.
-    var guestAcknowledged: Bool {
-        UserDefaults.standard.string(forKey: "persist.guestAcknowledged") == "true"
-    }
-
     private let client = SupabaseService.shared.client
     private var appleNonce: String?
 
     private override init() {
         super.init()
+        // Wipe any legacy guest flag from older builds — the app no longer
+        // supports guest mode and only proceeds past sign-in with a real
+        // Supabase session.
+        UserDefaults.standard.removeObject(forKey: "persist.guestAcknowledged")
         Task { await restoreSession() }
     }
 
@@ -41,6 +37,9 @@ final class AuthManager: NSObject {
             let session = try await client.auth.session
             self.session = session
             self.user = session.user
+            // Identify the restored user to RevenueCat so purchases attribute
+            // to the real Supabase UUID instead of `$RCAnonymousID:...`.
+            await RevenueCatManager.shared.login(userId: session.user.id.uuidString.lowercased())
         } catch {
             Log.auth.info("No existing session: \(error.localizedDescription)")
         }
@@ -49,40 +48,66 @@ final class AuthManager: NSObject {
 
     // MARK: - Apple Sign-In
 
-    func signInWithApple() async {
+    /// Configure an `ASAuthorizationAppleIDRequest` produced by SwiftUI's
+    /// `SignInWithAppleButton`. Generates a fresh nonce, hashes it, and
+    /// stores the raw nonce for later token verification.
+    func configureAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+        let nonce = randomNonceString()
+        self.appleNonce = nonce
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = sha256(nonce)
+    }
+
+    /// Handle the result of `SignInWithAppleButton`'s authorization flow.
+    func handleAppleResult(_ result: Result<ASAuthorization, Error>) async {
         isLoading = true
         errorMessage = nil
         defer { isLoading = false }
 
         do {
-            let nonce = randomNonceString()
-            let hashedNonce = sha256(nonce)
-            self.appleNonce = nonce
-
-            let authorization = try await requestAppleAuthorization(hashedNonce: hashedNonce)
-            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-                  let tokenData = credential.identityToken,
-                  let tokenString = String(data: tokenData, encoding: .utf8) else {
-                errorMessage = "Không lấy được Apple identity token"
-                return
-            }
-
-            let newSession = try await client.auth.signInWithIdToken(
-                credentials: OpenIDConnectCredentials(
-                    provider: .apple,
-                    idToken: tokenString,
-                    nonce: nonce
-                )
-            )
-            self.session = newSession
-            self.user = newSession.user
-            await checkUserStatus(userId: newSession.user.id.uuidString)
+            let authorization = try result.get()
+            try await completeAppleSignIn(authorization: authorization)
         } catch let error as ASAuthorizationError where error.code == .canceled {
             Log.auth.info("Apple sign-in cancelled")
         } catch {
             Log.auth.error("Apple sign-in failed: \(error.localizedDescription)")
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func completeAppleSignIn(authorization: ASAuthorization) async throws {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            Log.auth.error("Apple credential not ASAuthorizationAppleIDCredential — got \(type(of: authorization.credential))")
+            errorMessage = "Không lấy được Apple credential"
+            return
+        }
+        Log.auth.info("Apple credential userID=\(credential.user, privacy: .public) hasToken=\(credential.identityToken != nil) hasAuthCode=\(credential.authorizationCode != nil) email=\(credential.email ?? "nil", privacy: .public)")
+        guard let tokenData = credential.identityToken else {
+            Log.auth.error("Apple identityToken is nil — likely Sign In with Apple capability not enabled on the App ID, or simulator has no Apple ID signed in")
+            errorMessage = "Apple chưa cấp identity token. Kiểm tra lại Sign In with Apple capability trên App ID, hoặc đăng nhập Apple ID trong Settings của simulator/device."
+            return
+        }
+        guard let tokenString = String(data: tokenData, encoding: .utf8) else {
+            Log.auth.error("identityToken data is not UTF-8")
+            errorMessage = "Apple identity token không hợp lệ"
+            return
+        }
+        guard let nonce = appleNonce else {
+            Log.auth.error("appleNonce was not set before authorization — race condition")
+            errorMessage = "Phiên đăng nhập Apple đã hết hạn, thử lại"
+            return
+        }
+
+        let newSession = try await client.auth.signInWithIdToken(
+            credentials: OpenIDConnectCredentials(
+                provider: .apple,
+                idToken: tokenString,
+                nonce: nonce
+            )
+        )
+        self.session = newSession
+        self.user = newSession.user
+        await checkUserStatus(userId: newSession.user.id.uuidString)
     }
 
     // MARK: - Google Sign-In (OAuth via ASWebAuthenticationSession)
@@ -222,13 +247,6 @@ final class AuthManager: NSObject {
         await logout()
     }
 
-    func continueAsGuest() {
-        _ = ClientIdStore.ensureClientId()
-        UserDefaults.standard.set("true", forKey: "persist.guestAcknowledged")
-        // Trigger an @Observable re-render by touching a published field.
-        self.hasRestoredSession = true
-    }
-
     func updateDisplayName(_ name: String) async {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
@@ -255,6 +273,12 @@ final class AuthManager: NSObject {
     }
 
     private func checkUserStatus(userId: String) async {
+        // Identify the freshly-authenticated user to RevenueCat so any
+        // purchase / customerInfo write attributes to this UUID rather than
+        // the previously-generated `$RCAnonymousID:...`. Called from every
+        // sign-in path (Apple/Google/email/sign-up) that lands here.
+        await RevenueCatManager.shared.login(userId: userId.lowercased())
+
         do {
             let count = try await AssetRepository().countOwned(itemType: "character", userId: userId)
             let isNew = count == 0
@@ -266,24 +290,6 @@ final class AuthManager: NSObject {
         } catch {
             Log.auth.warning("checkUserStatus failed: \(error.localizedDescription)")
             self.isNewUser = false
-        }
-    }
-
-    // MARK: - Apple helpers
-
-    private func requestAppleAuthorization(hashedNonce: String) async throws -> ASAuthorization {
-        try await withCheckedThrowingContinuation { cont in
-            let provider = ASAuthorizationAppleIDProvider()
-            let request = provider.createRequest()
-            request.requestedScopes = [.fullName, .email]
-            request.nonce = hashedNonce
-
-            let controller = ASAuthorizationController(authorizationRequests: [request])
-            let delegate = AppleAuthDelegate(continuation: cont)
-            controller.delegate = delegate
-            controller.presentationContextProvider = delegate
-            AppleAuthDelegate.retain(delegate)
-            controller.performRequests()
         }
     }
 
@@ -306,38 +312,6 @@ final class AuthManager: NSObject {
             session.presentationContextProvider = WebAuthPresentationContextProvider.shared
             session.start()
         }
-    }
-}
-
-private final class AppleAuthDelegate: NSObject, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
-    private static var retained: [AppleAuthDelegate] = []
-
-    static func retain(_ delegate: AppleAuthDelegate) {
-        retained.append(delegate)
-    }
-
-    private static func release(_ delegate: AppleAuthDelegate) {
-        retained.removeAll { $0 === delegate }
-    }
-
-    private let continuation: CheckedContinuation<ASAuthorization, Error>
-
-    init(continuation: CheckedContinuation<ASAuthorization, Error>) {
-        self.continuation = continuation
-    }
-
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        continuation.resume(returning: authorization)
-        Self.release(self)
-    }
-
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        continuation.resume(throwing: error)
-        Self.release(self)
-    }
-
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        WebAuthPresentationContextProvider.shared.anchor()
     }
 }
 

@@ -21,12 +21,34 @@ struct VRMWebView: UIViewRepresentable {
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
 
+        // Route every `vrmcache://...` request through our persistent disk
+        // cache so previously-downloaded VRM/FBX files survive across launches.
+        config.setURLSchemeHandler(context.coordinator.schemeHandler, forURLScheme: VRMSchemeHandler.scheme)
+
         // Inject the same two WKUserScripts the Swift version expected before
         // the HTML evaluates: the discovered file list + persisted selections.
+        // Also bridge JS console.log/warn/error to the native `loading`
+        // message channel so we can read them via `log show`.
         let fileList = FileDiscovery.generateFileListJSON()
         let bootstrap = """
         window.__isNativeShell = true;
         window.discoveredFiles = \(fileList);
+        (function(){
+            const send = (level, args) => {
+                try {
+                    const text = '[js:' + level + '] ' + Array.from(args).map(a => {
+                        if (typeof a === 'string') return a;
+                        try { return JSON.stringify(a); } catch (_) { return String(a); }
+                    }).join(' ');
+                    window.webkit?.messageHandlers?.loading?.postMessage(text);
+                } catch (_) {}
+            };
+            const orig = { log: console.log, warn: console.warn, error: console.error };
+            console.log   = function () { send('log',   arguments); orig.log.apply(console, arguments); };
+            console.warn  = function () { send('warn',  arguments); orig.warn.apply(console, arguments); };
+            console.error = function () { send('error', arguments); orig.error.apply(console, arguments); };
+            window.addEventListener('error', e => send('uncaught', [e.message, e.filename + ':' + e.lineno]));
+        })();
         """
         let persisted = Persistence.generateInjectionScript()
 
@@ -95,6 +117,7 @@ struct VRMWebView: UIViewRepresentable {
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate {
         let parent: VRMWebView
+        let schemeHandler = VRMSchemeHandler()
 
         init(parent: VRMWebView) {
             self.parent = parent
