@@ -130,48 +130,27 @@ struct SignInScreen: View {
         }
     }
 
-    // Apple's HIG-compliant button via AuthenticationServices.
-    //
-    // We MUST NOT render `SignInWithAppleButton` when the user hasn't
-    // completed the age gate yet — SwiftUI submits the auth request the
-    // moment the button fires its `onRequest` callback, with no way to
-    // abort. That used to leave a sentinel nonce in flight, which broke
-    // the actual sign-in attempt that came after the age confirmation.
-    //
-    // Instead, when not age-verified we render an Apple-styled placeholder
-    // button that only shows the age prompt; once `isAgeVerified` flips
-    // true, we swap to the real `SignInWithAppleButton` and the user taps
-    // it for the actual auth flow.
-    @ViewBuilder
+    // HIG-compliant Apple-styled button (black bg, white Apple logo + text).
+    // We render the same button regardless of age-gate state and trigger
+    // SIWA programmatically via `auth.startAppleSignIn()`, so the user only
+    // taps once: tap → age dialog (if needed) → confirm → SIWA sheet.
     private var appleSignInButton: some View {
-        if isAgeVerified {
-            SignInWithAppleButton(.signIn) { request in
-                auth.configureAppleRequest(request)
-            } onCompletion: { result in
-                Task { await auth.handleAppleResult(result) }
+        Button {
+            handleSignIn(.apple)
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "applelogo")
+                    .font(.system(size: 18, weight: .medium))
+                Text(L10n.signInWithApple)
+                    .font(.system(size: 17, weight: .medium))
             }
-            .signInWithAppleButtonStyle(.black)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
             .frame(height: 48)
+            .background(Color.black)
             .clipShape(RoundedRectangle(cornerRadius: 12))
-        } else {
-            Button {
-                pendingProvider = .apple
-                showAgePrompt = true
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "applelogo")
-                        .font(.system(size: 18, weight: .medium))
-                    Text(L10n.signInWithApple)
-                        .font(.system(size: 17, weight: .medium))
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.black)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
         }
+        .buttonStyle(.plain)
     }
 
     // Google branding-compliant button:
@@ -224,7 +203,7 @@ struct SignInScreen: View {
     private func proceed(with provider: Provider) {
         Task { @MainActor in
             switch provider {
-            case .apple: break // Apple flow is driven by SignInWithAppleButton itself
+            case .apple: auth.startAppleSignIn()
             case .google: await auth.signInWithGoogle()
             }
         }

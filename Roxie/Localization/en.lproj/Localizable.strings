@@ -75,6 +75,16 @@
 "settings.section_account" = "Account";
 "settings.section_info" = "About";
 
+/* Delete account */
+"delete.account" = "Delete account";
+"delete.cancel" = "Cancel";
+"delete.confirm_message" = "Delete your account? All data (characters, messages, settings) will be permanently erased and cannot be recovered.";
+"delete.continue" = "Continue deleting account";
+"delete.pro_warning_title" = "You have an active Pro subscription";
+"delete.pro_warning_body" = "Deleting your account does NOT cancel Bonie Pro. Apple will keep auto-renewing until you cancel in Settings → Apple ID → Subscriptions. Cancel there first, then come back to delete your account.";
+"delete.open_app_store" = "Open App Store to cancel";
+"delete.server_failed" = "Couldn't delete the account on the server: %@";
+
 /* Chat */
 "chat.input_placeholder" = "Type a message...";
 "chat.history_title" = "Chat history";
@@ -137,6 +147,7 @@
 "cyber.load_more" = "LOAD_MORE //";
 "cyber.loading_archive" = "// LOADING ARCHIVE";
 "cyber.loading_roster" = "// LOADING ROSTER";
+"cyber.loading_model" = "// LOADING MODEL";
 "cyber.archive_count" = "ARCHIVE // %d ENTRIES";
 
 "cyber.sub.tier" = "[ TIER ]";

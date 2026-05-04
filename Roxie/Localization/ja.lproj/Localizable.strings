@@ -75,6 +75,16 @@
 "settings.section_account" = "アカウント";
 "settings.section_info" = "情報";
 
+/* Delete account */
+"delete.account" = "アカウントを削除";
+"delete.cancel" = "キャンセル";
+"delete.confirm_message" = "アカウントを削除しますか？すべてのデータ（キャラクター、メッセージ、設定）は完全に削除され、復元できません。";
+"delete.continue" = "アカウント削除を続行";
+"delete.pro_warning_title" = "有効なProサブスクリプションがあります";
+"delete.pro_warning_body" = "アカウントを削除してもBonie Proは自動的にキャンセルされません。設定 → Apple ID → サブスクリプションで解約するまで、Appleは自動更新を続けます。先にApp Storeで解約してから、アカウントを削除してください。";
+"delete.open_app_store" = "App Storeを開く";
+"delete.server_failed" = "サーバーでアカウントを削除できませんでした：%@";
+
 /* Chat */
 "chat.input_placeholder" = "メッセージを入力…";
 "chat.history_title" = "チャット履歴";
@@ -137,6 +147,7 @@
 "cyber.load_more" = "もっと読む //";
 "cyber.loading_archive" = "// アーカイブ読込中";
 "cyber.loading_roster" = "// ロースター読込中";
+"cyber.loading_model" = "// モデル読込中";
 "cyber.archive_count" = "アーカイブ // %d 件";
 
 "cyber.sub.tier" = "[ ティア ]";

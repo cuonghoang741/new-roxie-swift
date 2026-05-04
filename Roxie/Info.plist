@@ -30,10 +30,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.eduto.roxieswift.auth</string>
+			<string>eduto.bonie.auth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>roxieswift</string>
+				<string>bonie</string>
 			</array>
 		</dict>
 	</array>

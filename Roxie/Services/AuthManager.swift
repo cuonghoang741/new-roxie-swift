@@ -16,6 +16,7 @@ final class AuthManager: NSObject {
     private(set) var isNewUser: Bool?
     private let client = SupabaseService.shared.client
     private var appleNonce: String?
+    private var appleAuthController: ASAuthorizationController?
 
     private override init() {
         super.init()
@@ -56,6 +57,21 @@ final class AuthManager: NSObject {
         self.appleNonce = nonce
         request.requestedScopes = [.fullName, .email]
         request.nonce = sha256(nonce)
+    }
+
+    /// Programmatically start Sign In with Apple via `ASAuthorizationController`.
+    /// Lets the caller (e.g., SignInScreen) trigger the system sheet from any
+    /// button, not only Apple's `SignInWithAppleButton`. Required so the age
+    /// gate can run first and we still launch SIWA without forcing a 2nd tap.
+    func startAppleSignIn() {
+        let provider = ASAuthorizationAppleIDProvider()
+        let request = provider.createRequest()
+        configureAppleRequest(request)
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        appleAuthController = controller
+        controller.performRequests()
     }
 
     /// Handle the result of `SignInWithAppleButton`'s authorization flow.
@@ -187,12 +203,34 @@ final class AuthManager: NSObject {
         }
     }
 
-    /// Wipe the user's data from Supabase tables, clear local persistence,
-    /// then sign out. Mirrors `deleteAccountLocally` from the RN AuthManager.
+    /// Stage of the multi-step account-delete pipeline. Surfaced via
+    /// `deleteAccountStage` so the SettingsSheet can render a step-by-step
+    /// progress HUD instead of an opaque spinner.
+    enum DeleteStage: Equatable {
+        case idle
+        case purgingData
+        case deletingAuthUser
+        case loggingOut
+        case done
+        case failed(String)
+    }
+
+    private(set) var deleteAccountStage: DeleteStage = .idle
+
+    /// Wipe the user's data from Supabase tables, delete the `auth.users` row
+    /// via the `delete_my_user` RPC, clear local persistence, then sign out.
+    /// Without the RPC step, signing back in with the same Apple/Google ID
+    /// resolves to the same UUID — RevenueCat then re-attaches the prior
+    /// entitlement and the user "stays Pro" after deletion.
     func deleteAccount() async {
+        isDeletingAccount = true
         isLoading = true
         errorMessage = nil
-        defer { isLoading = false }
+        deleteAccountStage = .purgingData
+        defer {
+            isLoading = false
+            isDeletingAccount = false
+        }
 
         let userId = user?.id.uuidString.lowercased()
         let clientId = userId == nil ? ClientIdStore.ensureClientId() : nil
@@ -242,9 +280,29 @@ final class AuthManager: NSObject {
         }
         ClientIdStore.clearClientId()
 
+        // Wipe the auth.users row so the next sign-in (even with the same
+        // Apple/Google identity) provisions a fresh Supabase UUID. Without
+        // this step the user "comes back as Pro" because RevenueCat
+        // re-attaches the prior entitlement to the same App User ID.
+        if userId != nil {
+            deleteAccountStage = .deletingAuthUser
+            do {
+                _ = try await client.rpc("delete_my_user").execute()
+                Log.auth.info("delete_my_user RPC succeeded")
+            } catch {
+                Log.auth.error("delete_my_user RPC failed: \(error.localizedDescription, privacy: .public)")
+                deleteAccountStage = .failed(error.localizedDescription)
+                errorMessage = String(format: L10n.deleteServerFailed, error.localizedDescription)
+                // Still sign out locally so the device isn't stuck on a
+                // half-deleted state — the user can retry from a fresh login.
+            }
+        }
+
+        deleteAccountStage = .loggingOut
         await RevenueCatManager.shared.logout()
         await OneSignalService.shared.removeExternalUserId()
         await logout()
+        deleteAccountStage = .done
     }
 
     func updateDisplayName(_ name: String) async {
@@ -311,6 +369,30 @@ final class AuthManager: NSObject {
             session.prefersEphemeralWebBrowserSession = true
             session.presentationContextProvider = WebAuthPresentationContextProvider.shared
             session.start()
+        }
+    }
+}
+
+extension AuthManager: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    nonisolated func authorizationController(controller: ASAuthorizationController,
+                                             didCompleteWithAuthorization authorization: ASAuthorization) {
+        Task { @MainActor in
+            self.appleAuthController = nil
+            await self.handleAppleResult(.success(authorization))
+        }
+    }
+
+    nonisolated func authorizationController(controller: ASAuthorizationController,
+                                             didCompleteWithError error: any Error) {
+        Task { @MainActor in
+            self.appleAuthController = nil
+            await self.handleAppleResult(.failure(error))
+        }
+    }
+
+    nonisolated func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        MainActor.assumeIsolated {
+            WebAuthPresentationContextProvider.shared.anchor()
         }
     }
 }

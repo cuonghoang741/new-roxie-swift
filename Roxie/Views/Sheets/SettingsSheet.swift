@@ -359,10 +359,14 @@ private func iconBubble(systemName: String, tint: Color) -> some View {
 
 struct EditProfileSheet: View {
     @Environment(AuthManager.self) private var auth
+    @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
     @State private var name: String = ""
     @State private var saving = false
+    @State private var showDeleteSubWarning = false
     @State private var showDeleteConfirm = false
+
+    private var isPro: Bool { RevenueCatManager.shared.isProUser }
 
     var body: some View {
         CyberSheetChrome(title: "Profile_Edit", subtitle: "User // Mutate", tint: Cyber.cyan) {
@@ -406,7 +410,13 @@ struct EditProfileSheet: View {
 
                     Spacer().frame(height: 12)
 
-                    Button { showDeleteConfirm = true } label: {
+                    Button {
+                        if isPro {
+                            showDeleteSubWarning = true
+                        } else {
+                            showDeleteConfirm = true
+                        }
+                    } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "trash.fill").font(.system(size: 13, weight: .heavy))
                             Text("DELETE_ACCOUNT")
@@ -435,33 +445,42 @@ struct EditProfileSheet: View {
                 name = value
             }
         }
+        .alert(L10n.deleteProWarningTitle, isPresented: $showDeleteSubWarning) {
+            Button(L10n.deleteOpenAppStore) {
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    openURL(url)
+                }
+            }
+            Button(L10n.deleteContinue, role: .destructive) {
+                showDeleteConfirm = true
+            }
+            Button(L10n.deleteCancel, role: .cancel) {}
+        } message: {
+            Text(L10n.deleteProWarningBody)
+        }
         .confirmationDialog(
-            "Delete your account? This permanently removes your data and cannot be undone.",
+            L10n.deleteConfirmMessage,
             isPresented: $showDeleteConfirm,
             titleVisibility: .visible
         ) {
-            Button("Delete Account", role: .destructive) {
+            Button(L10n.deleteAccount, role: .destructive) {
                 Task {
                     await auth.deleteAccount()
                     dismiss()
                 }
             }
-            Button("Cancel", role: .cancel) {}
+            Button(L10n.deleteCancel, role: .cancel) {}
         }
         .overlay {
-            if auth.isLoading {
+            if auth.isDeletingAccount {
                 ZStack {
-                    Cyber.bg.opacity(0.7).ignoresSafeArea()
-                    VStack(spacing: 10) {
-                        ProgressView().tint(Cyber.danger).scaleEffect(1.3)
-                        Text("// PURGING DATA")
-                            .font(Cyber.mono(11, weight: .heavy))
-                            .foregroundStyle(Cyber.danger)
-                            .tracking(1.6)
-                    }
+                    Cyber.bg.opacity(0.85).ignoresSafeArea()
+                    DeleteAccountProgressOverlay(stage: auth.deleteAccountStage)
                 }
+                .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: auth.isDeletingAccount)
     }
 
     @ViewBuilder
@@ -484,6 +503,106 @@ struct EditProfileSheet: View {
             saving = false
             dismiss()
         }
+    }
+}
+
+// MARK: - Delete-account progress HUD
+
+private struct DeleteAccountProgressOverlay: View {
+    let stage: AuthManager.DeleteStage
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Image(systemName: stageIcon)
+                .font(.system(size: 36, weight: .heavy))
+                .foregroundStyle(stageTint)
+                .shadow(color: stageTint.opacity(0.7), radius: 10)
+
+            Text(stageTitle)
+                .font(Cyber.mono(13, weight: .heavy))
+                .foregroundStyle(Cyber.text)
+                .tracking(1.6)
+
+            VStack(alignment: .leading, spacing: 8) {
+                stepRow(label: "PURGE_DATA", state: state(for: .purgingData))
+                stepRow(label: "DELETE_AUTH_USER", state: state(for: .deletingAuthUser))
+                stepRow(label: "SIGN_OUT", state: state(for: .loggingOut))
+            }
+            .padding(14)
+            .background(Cyber.surface.opacity(0.85))
+            .overlay(Rectangle().stroke(Cyber.danger.opacity(0.5), lineWidth: 1))
+
+            if case .failed(let msg) = stage {
+                Text(msg)
+                    .font(Cyber.mono(10, weight: .semibold))
+                    .foregroundStyle(Cyber.danger)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+            }
+        }
+        .padding(28)
+    }
+
+    private enum StepState { case pending, active, done }
+
+    private func state(for step: AuthManager.DeleteStage) -> StepState {
+        switch (step, stage) {
+        case (.purgingData, .purgingData): return .active
+        case (.deletingAuthUser, .deletingAuthUser): return .active
+        case (.loggingOut, .loggingOut): return .active
+        case (.purgingData, .deletingAuthUser), (.purgingData, .loggingOut), (.purgingData, .done): return .done
+        case (.deletingAuthUser, .loggingOut), (.deletingAuthUser, .done): return .done
+        case (.loggingOut, .done): return .done
+        default: return .pending
+        }
+    }
+
+    private var stageIcon: String {
+        if case .failed = stage { return "xmark.octagon.fill" }
+        if stage == .done { return "checkmark.seal.fill" }
+        return "trash.fill"
+    }
+
+    private var stageTint: Color {
+        if case .failed = stage { return Cyber.danger }
+        if stage == .done { return Cyber.lime }
+        return Cyber.danger
+    }
+
+    private var stageTitle: String {
+        switch stage {
+        case .idle: return "// READY"
+        case .purgingData: return "// PURGING USER DATA"
+        case .deletingAuthUser: return "// DELETING ACCOUNT"
+        case .loggingOut: return "// SIGNING OUT"
+        case .done: return "// COMPLETE"
+        case .failed: return "// FAILED"
+        }
+    }
+
+    private func stepRow(label: String, state: StepState) -> some View {
+        HStack(spacing: 10) {
+            Group {
+                switch state {
+                case .pending:
+                    Image(systemName: "circle")
+                        .foregroundStyle(Cyber.textMuted)
+                case .active:
+                    ProgressView().tint(Cyber.danger).scaleEffect(0.7)
+                case .done:
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Cyber.lime)
+                }
+            }
+            .frame(width: 18, height: 18)
+
+            Text(label)
+                .font(Cyber.mono(10, weight: .heavy))
+                .foregroundStyle(state == .pending ? Cyber.textMuted : Cyber.text)
+                .tracking(1.4)
+            Spacer()
+        }
+        .frame(width: 220, alignment: .leading)
     }
 }
 

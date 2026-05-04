@@ -32,6 +32,57 @@ final class CharacterRepository: BaseRepository {
         return rows.first
     }
 
+    /// Pick a random character that has more than `minCostumes` outfits and
+    /// insert a `user_character` row to claim it for the current user. Used
+    /// by the new-user gift flow so the starter avatar isn't always the same
+    /// catalog default — variety up front, plus enough outfits so the
+    /// CostumeSheet feels worth opening on day one.
+    ///
+    /// Returns the claimed character so the caller can update VRM state
+    /// without re-fetching everything. Throws if there's no signed-in user
+    /// or no eligible candidates.
+    @discardableResult
+    func claimRandomStarter(minCostumes: Int = 3) async throws -> CharacterItem {
+        guard let uid = await currentUserId() else {
+            throw NSError(domain: "claimRandomStarter", code: 401,
+                          userInfo: [NSLocalizedDescriptionKey: "Not signed in"])
+        }
+
+        struct CostumeRow: Decodable { let character_id: String? }
+        let costumeRows: [CostumeRow] = try await client
+            .from("character_costumes")
+            .select("character_id")
+            .eq("available", value: true)
+            .execute()
+            .value
+        var counts: [String: Int] = [:]
+        for r in costumeRows {
+            guard let cid = r.character_id else { continue }
+            counts[cid, default: 0] += 1
+        }
+        let eligibleIds = counts.filter { $0.value > minCostumes }.map { $0.key }
+        guard !eligibleIds.isEmpty else {
+            throw NSError(domain: "claimRandomStarter", code: 404,
+                          userInfo: [NSLocalizedDescriptionKey: "No eligible characters"])
+        }
+
+        let candidates = try await fetchAllCharacters()
+            .filter { eligibleIds.contains($0.id) }
+        guard let pick = candidates.randomElement() else {
+            throw NSError(domain: "claimRandomStarter", code: 404,
+                          userInfo: [NSLocalizedDescriptionKey: "No accessible characters"])
+        }
+
+        struct Insert: Encodable { let user_id: String; let character_id: String }
+        _ = try await client
+            .from("user_character")
+            .insert(Insert(user_id: uid, character_id: pick.id))
+            .execute()
+
+        Log.app.info("[claim] Granted starter \(pick.name ?? "?", privacy: .public) (\(pick.id, privacy: .public))")
+        return pick
+    }
+
     /// `user_character.character_id` — same contract as
     /// `CharacterRepository.fetchOwnedCharacterIds` in RN.
     func fetchOwnedCharacterIds() async throws -> [String] {

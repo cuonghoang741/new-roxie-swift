@@ -123,9 +123,14 @@ struct ChatHistoryModal: View {
                 .padding(14)
             }
             .scrollIndicators(.hidden)
-            .onChange(of: chat.history.count) { _, _ in
+            .onAppear {
                 if let last = chat.history.last?.id {
-                    withAnimation { proxy.scrollTo(last, anchor: .bottom) }
+                    proxy.scrollTo(last, anchor: .bottom)
+                }
+            }
+            .onChange(of: chat.history.last?.id) { _, newLast in
+                if let newLast {
+                    withAnimation { proxy.scrollTo(newLast, anchor: .bottom) }
                 }
             }
         }

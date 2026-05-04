@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AuthManager.self) private var auth
+    @Environment(VRMContext.self) private var vrm
 
     // @AppStorage for onboarding flags so the view re-renders the moment
     // their string flips to "true". Reading UserDefaults inside a computed
@@ -11,6 +12,8 @@ struct RootView: View {
     @AppStorage("persist.hasSeenImageOnboarding") private var hasSeenImageOnboarding: String = ""
     @AppStorage("persist.hasClaimedNewUserGift") private var hasClaimedNewUserGift: String = ""
     @AppStorage(PersistKeys.hasCompletedOnboardingV2) private var hasCompletedOnboardingV2: String = ""
+
+    @State private var claiming = false
 
     var body: some View {
         Group {
@@ -28,10 +31,18 @@ struct RootView: View {
                 .onAppear { Log.app.info("[onboarding] route=imageOnboarding") }
             } else if needsNewUserGift {
                 NewUserGiftScreen {
-                    Log.app.info("[onboarding] NewUserGift onFinish — flipping hasClaimedNewUserGift")
-                    hasClaimedNewUserGift = "true"
+                    Task { await claimStarter() }
                 }
                 .onAppear { Log.app.info("[onboarding] route=newUserGift") }
+                .disabled(claiming)
+                .overlay {
+                    if claiming {
+                        ZStack {
+                            Color.black.opacity(0.55).ignoresSafeArea()
+                            ProgressView().tint(.white).scaleEffect(1.4)
+                        }
+                    }
+                }
             } else if needsOnboardingV2 {
                 OnboardingV2Screen(selectedCharacter: nil) {
                     Log.app.info("[onboarding] OnboardingV2 onFinish — flipping hasCompletedOnboardingV2")
@@ -73,5 +84,29 @@ struct RootView: View {
     private var needsOnboardingV2: Bool {
         guard auth.session != nil else { return false }
         return hasCompletedOnboardingV2 != "true"
+    }
+
+    @MainActor
+    private func claimStarter() async {
+        guard !claiming else { return }
+        claiming = true
+        defer { claiming = false }
+        Log.app.info("[onboarding] NewUserGift CLAIM tapped — granting random starter")
+        do {
+            let pick = try await CharacterRepository().claimRandomStarter()
+            // Refresh catalog so ownedCharacterIds includes the new claim,
+            // then set the picked character as current. Without the refresh,
+            // ensureDefaultSelection on the next screen would fall back to
+            // the first catalog row again.
+            await vrm.refreshInitialData()
+            vrm.setCurrentCharacter(pick)
+            hasClaimedNewUserGift = "true"
+        } catch {
+            Log.app.error("[onboarding] claimStarter failed: \(error.localizedDescription, privacy: .public)")
+            // Don't block the user — flip the flag so they can proceed even
+            // if the insert failed; ensureDefaultSelection will fall back to
+            // a catalog character.
+            hasClaimedNewUserGift = "true"
+        }
     }
 }

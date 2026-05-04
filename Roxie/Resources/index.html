@@ -306,16 +306,7 @@
         // Combine all files for the app to see
         const fbxFiles = [...legacyFbxFiles, ...proFbxFiles];
 
-        // When running inside the native iOS shell (Swift WKWebView), route
-        // VRM model URLs through the `vrmcache://` custom scheme so the
-        // VRMSchemeHandler serves blobs from the on-disk VRMAssetCache —
-        // VRM models are heavy and we want them persisted across launches.
-        // FBX animation URLs stay on real https (the FBXLoader path can't
-        // hit a custom scheme cleanly), so the FBX_BASE_URL constants below
-        // are intentionally left untouched.
-        const VRM_BASE_URL = window.__isNativeShell
-            ? 'vrmcache://r2-chars/'
-            : 'https://pub-6671ed00c8d945b28ff7d8ec392f60b8.r2.dev/CHARACTERS/';
+        const VRM_BASE_URL = 'https://pub-6671ed00c8d945b28ff7d8ec392f60b8.r2.dev/CHARACTERS/';
         const FBX_BASE_URL = 'https://pub-4617cbac59b041b498eb93e22297c47f.r2.dev/Anim/';
         const FBX_BASE_URL_2 = 'https://pub-8b57fd6b30c04b11b3f3a092bdfed0e2.r2.dev/';
 
@@ -435,26 +426,16 @@
         function fetchAndCacheObjectURL(name, baseUrl, cacheMap) {
             if (cacheMap.has(name)) return cacheMap.get(name);
             const url = baseUrl + encodeURI(name);
-            // XHR works for both the `vrmcache://` custom scheme handler
-            // (custom schemes have no origin and are rejected by `fetch` +
-            // CORS) and regular https. Real cdn URLs work via either path.
-            const promise = new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.responseType = 'blob';
-                xhr.onload = () => {
-                    if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
-                        resolve(URL.createObjectURL(xhr.response));
-                    } else {
-                        reject(new Error('HTTP ' + xhr.status + ' for ' + name));
-                    }
-                };
-                xhr.onerror = () => reject(new Error('Network error for ' + name));
-                xhr.send();
-            }).catch(err => {
-                cacheMap.delete(name);
-                throw err;
-            });
+            const promise = fetch(url, { mode: 'cors' })
+                .then(r => {
+                    if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + name);
+                    return r.blob();
+                })
+                .then(blob => URL.createObjectURL(blob))
+                .catch(err => {
+                    cacheMap.delete(name);
+                    throw err;
+                });
             cacheMap.set(name, promise);
             return promise;
         }
@@ -1212,9 +1193,12 @@
             currentModelUrl = modelUrl;
             // show loading overlay
             setModelLoading(true);
+            const __vrmT0 = performance.now();
             loader.load(
                 modelUrl,
                 (gltf) => {
+                    console.log(`⏱️ [loadVRM] ${modelName} GLTF download = ${(performance.now() - __vrmT0).toFixed(0)}ms`);
+                    const __setupT0 = performance.now();
                     const vrm = gltf.userData.vrm;
                     VRMUtils.removeUnnecessaryVertices(gltf.scene);
                     VRMUtils.combineSkeletons(gltf.scene);
@@ -1258,6 +1242,7 @@
                         // No animation to load, start expressions after a short delay
                         setTimeout(startExpressions, 500);
                     }
+                    console.log(`⏱️ [loadVRM] ${modelName} VRM setup (post-download) = ${(performance.now() - __setupT0).toFixed(0)}ms`);
                     // Notify Swift that model is loaded and scene attached
                     try { window.webkit?.messageHandlers?.loading?.postMessage('modelLoaded'); } catch { }
                     try { if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage('modelLoaded'); } catch { }
@@ -1280,12 +1265,25 @@
             );
         }
 
-        function loadFBX(animationUrl, animationName, crossFadeDuration = 0.5) {
+        async function loadFBX(animationUrl, animationName, crossFadeDuration = 0.5) {
             currentAnimationUrl = animationUrl;
             if (!currentMixer || !currentVrm) {
                 /* please load a VRM model first */
                 return;
             }
+
+            // Prefer the in-memory blob from `animObjectURLCache` if we have
+            // it. FBXLoader doesn't share three.js's resource cache, so
+            // calling `loadHumanoidAnimation(remoteUrl)` would re-download the
+            // FBX every costume swap — the dominant freeze on swaps. The
+            // blob URL resolves instantly and skips the network roundtrip.
+            let resolvedUrl = animationUrl;
+            try {
+                if (animationName && animObjectURLCache.has(animationName)) {
+                    const cached = await animObjectURLCache.get(animationName);
+                    if (cached) resolvedUrl = cached;
+                }
+            } catch { /* fall back to original URL */ }
 
             // Stop current action completely to prevent position blending issues
             if (currentAction) {
@@ -1305,8 +1303,10 @@
             } catch (e) { console.warn('Failed to reset VRM position:', e); }
 
             updateFileDisplay(document.getElementById('currentModel').textContent, `Loading ${animationName}...`);
-            loadHumanoidAnimation(animationUrl, currentVrm)
+            const __t0 = performance.now();
+            loadHumanoidAnimation(resolvedUrl, currentVrm)
                 .then((clip) => {
+                    console.log(`⏱️ [loadFBX] ${animationName} fetch+retarget = ${(performance.now() - __t0).toFixed(0)}ms`);
                     // Reset position again before playing new animation
                     try {
                         currentVrm.scene.position.set(0, 0, 0);
@@ -1336,7 +1336,7 @@
                     }
                 })
                 .catch((error) => {
-                    console.error('loadFBX failed for', animationName, '@', animationUrl, '-', error?.message || error);
+                    /* error loading animation */
                     updateFileDisplay(document.getElementById('currentModel').textContent, 'Error: ' + error.message);
                 });
         }

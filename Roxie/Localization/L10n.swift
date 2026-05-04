@@ -78,6 +78,16 @@ enum L10n {
     static var signOut: String { localized("settings.sign_out") }
     static var sectionAccount: String { localized("settings.section_account") }
     static var sectionInfo: String { localized("settings.section_info") }
+
+    // Delete account
+    static var deleteAccount: String { localized("delete.account") }
+    static var deleteCancel: String { localized("delete.cancel") }
+    static var deleteConfirmMessage: String { localized("delete.confirm_message") }
+    static var deleteContinue: String { localized("delete.continue") }
+    static var deleteProWarningTitle: String { localized("delete.pro_warning_title") }
+    static var deleteProWarningBody: String { localized("delete.pro_warning_body") }
+    static var deleteOpenAppStore: String { localized("delete.open_app_store") }
+    static var deleteServerFailed: String { localized("delete.server_failed") }
     static var initializing: String { localized("experience.initializing") }
 
     // Chat
@@ -144,6 +154,7 @@ enum L10n {
         static var loadMore: String { localized("cyber.load_more") }
         static var loadingArchive: String { localized("cyber.loading_archive") }
         static var loadingRoster: String { localized("cyber.loading_roster") }
+        static var loadingModel: String { localized("cyber.loading_model") }
         static var archiveCount: String { localized("cyber.archive_count") } // %d entries
 
         // Subscription

@@ -117,11 +117,12 @@ struct VRMExperienceScreen: View {
         }
         .onChange(of: vrm.currentCharacter?.id) { _, _ in
             configureChatForCurrentCharacter()
-            // Force-push the new character into the scene if the webview is
-            // already showing the previous one.
-            if modelReady, let character = vrm.currentCharacter, let url = character.baseModelUrl {
-                bridge?.loadModelByURL(url, name: character.name ?? "Character")
-            }
+            // The WebView load is owned by `setCurrentCharacter` (user-driven
+            // path, called from CharacterSheet) and `ensureInitialModelApplied`
+            // (initial-restore path on first login). Calling
+            // `bridge?.loadModelByURL` here too caused two concurrent VRM
+            // loads on first login (base URL vs persisted-costume URL) — they
+            // disposed each other's scene and the model went motionless.
         }
         .onChange(of: modelReady) { _, ready in
             if ready {
@@ -153,6 +154,7 @@ struct VRMExperienceScreen: View {
             BackgroundSheet(
                 items: vrm.initialData.backgrounds,
                 ownedIds: vrm.initialData.ownedBackgroundIds,
+                selectedId: vrm.currentBackground?.id,
                 onSelect: { bg in
                     vrm.setCurrentBackground(bg, bridge: bridge)
                     root.showBackgroundSheet = false
@@ -167,6 +169,7 @@ struct VRMExperienceScreen: View {
             CharacterSheet(
                 items: vrm.initialData.characters,
                 ownedIds: vrm.initialData.ownedCharacterIds,
+                selectedId: vrm.currentCharacter?.id,
                 onSelect: { char in
                     vrm.setCurrentCharacter(char, bridge: bridge)
                     root.showCharacterSheet = false
@@ -181,6 +184,7 @@ struct VRMExperienceScreen: View {
             CostumeSheet(
                 items: vrm.initialData.costumes.filter { $0.characterId == vrm.currentCharacter?.id },
                 ownedIds: vrm.initialData.ownedCostumeIds,
+                selectedId: vrm.currentCostume?.id,
                 onSelect: { costume in
                     vrm.setCurrentCostume(costume, bridge: bridge)
                     root.showCostumeSheet = false

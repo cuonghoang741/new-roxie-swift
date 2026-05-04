@@ -9,6 +9,7 @@ private func isFreeTier(_ tier: String?) -> Bool {
 struct CharacterSheet: View {
     let items: [CharacterItem]
     let ownedIds: Set<String>
+    let selectedId: String?
     var onSelect: (CharacterItem) -> Void
     var onLockedTap: () -> Void
 
@@ -26,7 +27,12 @@ struct CharacterSheet: View {
                         Button {
                             if locked { onLockedTap() } else { onSelect(item) }
                         } label: {
-                            CharacterTile(item: item, owned: ownedIds.contains(item.id), locked: locked)
+                            CharacterTile(
+                                item: item,
+                                owned: ownedIds.contains(item.id),
+                                locked: locked,
+                                selected: item.id == selectedId
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -43,6 +49,7 @@ private struct CharacterTile: View {
     let item: CharacterItem
     let owned: Bool
     let locked: Bool
+    let selected: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -80,8 +87,10 @@ private struct CharacterTile: View {
         }
         .frame(height: 180)
         .background(Cyber.surface)
-        .overlay(Rectangle().stroke(Cyber.cyan.opacity(0.45), lineWidth: 1))
-        .overlay(CornerBrackets(tint: Cyber.cyan, size: 8))
+        .overlay(Rectangle().stroke(selected ? Cyber.lime : Cyber.cyan.opacity(0.45), lineWidth: selected ? 2 : 1))
+        .overlay(CornerBrackets(tint: selected ? Cyber.lime : Cyber.cyan, size: 8))
+        .shadow(color: selected ? Cyber.lime.opacity(0.45) : .clear, radius: 6)
+        .animation(.easeInOut(duration: 0.18), value: selected)
     }
 }
 
@@ -90,6 +99,7 @@ private struct CharacterTile: View {
 struct BackgroundSheet: View {
     let items: [BackgroundItem]
     let ownedIds: Set<String>
+    let selectedId: String?
     var onSelect: (BackgroundItem) -> Void
     var onLockedTap: () -> Void
 
@@ -107,7 +117,12 @@ struct BackgroundSheet: View {
                         Button {
                             if locked { onLockedTap() } else { onSelect(item) }
                         } label: {
-                            BackgroundTile(item: item, owned: ownedIds.contains(item.id), locked: locked)
+                            BackgroundTile(
+                                item: item,
+                                owned: ownedIds.contains(item.id),
+                                locked: locked,
+                                selected: item.id == selectedId
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -124,6 +139,7 @@ private struct BackgroundTile: View {
     let item: BackgroundItem
     let owned: Bool
     let locked: Bool
+    let selected: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -154,8 +170,10 @@ private struct BackgroundTile: View {
         }
         .frame(height: 120)
         .background(Cyber.surface)
-        .overlay(Rectangle().stroke(Cyber.violet.opacity(0.5), lineWidth: 1))
-        .overlay(CornerBrackets(tint: Cyber.violet, size: 8))
+        .overlay(Rectangle().stroke(selected ? Cyber.lime : Cyber.violet.opacity(0.5), lineWidth: selected ? 2 : 1))
+        .overlay(CornerBrackets(tint: selected ? Cyber.lime : Cyber.violet, size: 8))
+        .shadow(color: selected ? Cyber.lime.opacity(0.45) : .clear, radius: 6)
+        .animation(.easeInOut(duration: 0.18), value: selected)
     }
 }
 
@@ -164,6 +182,7 @@ private struct BackgroundTile: View {
 struct CostumeSheet: View {
     let items: [CostumeItem]
     let ownedIds: Set<String>
+    let selectedId: String?
     var onSelect: (CostumeItem) -> Void
     var onLockedTap: () -> Void
 
@@ -194,7 +213,12 @@ struct CostumeSheet: View {
                             Button {
                                 if locked { onLockedTap() } else { onSelect(item) }
                             } label: {
-                                CostumeTile(item: item, owned: ownedIds.contains(item.id), locked: locked)
+                                CostumeTile(
+                                    item: item,
+                                    owned: ownedIds.contains(item.id),
+                                    locked: locked,
+                                    selected: item.id == selectedId
+                                )
                             }
                             .buttonStyle(.plain)
                         }
@@ -212,6 +236,7 @@ private struct CostumeTile: View {
     let item: CostumeItem
     let owned: Bool
     let locked: Bool
+    let selected: Bool
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -242,8 +267,10 @@ private struct CostumeTile: View {
         }
         .frame(height: 160)
         .background(Cyber.surface)
-        .overlay(Rectangle().stroke(Cyber.magenta.opacity(0.5), lineWidth: 1))
-        .overlay(CornerBrackets(tint: Cyber.magenta, size: 8))
+        .overlay(Rectangle().stroke(selected ? Cyber.lime : Cyber.magenta.opacity(0.5), lineWidth: selected ? 2 : 1))
+        .overlay(CornerBrackets(tint: selected ? Cyber.lime : Cyber.magenta, size: 8))
+        .shadow(color: selected ? Cyber.lime.opacity(0.45) : .clear, radius: 6)
+        .animation(.easeInOut(duration: 0.18), value: selected)
     }
 }
 
