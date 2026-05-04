@@ -12,11 +12,15 @@
 		0B788B194509C85BC8862821 /* CatalogRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121F1692989C9D985708024E /* CatalogRepositories.swift */; };
 		12D8CFEB92D814F1618F9548 /* ruby.svg in Resources */ = {isa = PBXBuildFile; fileRef = 38C4C42E79AC1AE361F4F68A /* ruby.svg */; };
 		13AAC7179EC40EE8835CA012 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847A1F8EB96FE45547C4F52E /* L10n.swift */; };
+		1CDAD10F88CC0339E28278A7 /* RevenueCatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C8B03AB8BA8AEBFC52E39F2 /* RevenueCatManager.swift */; };
 		20CF1BC4183ECACD99EAA81B /* ChatBottomActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A460149D5A7DFC318939301F /* ChatBottomActions.swift */; };
 		31E5DB1AA77BEF3ED61AF907 /* Engagement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A11CB1A88FA25715A48434C9 /* Engagement.swift */; };
 		323CA817C86DB9BD83309FED /* TypingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CFDF607629E9440C1E796B /* TypingIndicator.swift */; };
+		358EBC91710633C69A839B69 /* VRMAssetCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700896BAC077729DCB0C6DA6 /* VRMAssetCache.swift */; };
+		362D23013C33A1E21FF30ADE /* VRMSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E8099652CC7805C3BC04AD /* VRMSchemeHandler.swift */; };
 		363365A32193029CBE2852EB /* diamond-pink.svg in Resources */ = {isa = PBXBuildFile; fileRef = ABBE5EA4BD8C99B99683FF3E /* diamond-pink.svg */; };
 		3759F46EFA73E77AEE668090 /* SceneAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60FCC70FF9410E95BE544551 /* SceneAppearance.swift */; };
+		3A0F0A710C65C35F23E1CAFB /* Bonie.storekit in Resources */ = {isa = PBXBuildFile; fileRef = F2AEF5B636B2BFB2817269AE /* Bonie.storekit */; };
 		3F33EE41EC2059634011159D /* AppRootModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8126F9908DCD35E2C0EBCC /* AppRootModel.swift */; };
 		3F959415E9D410651F9781A6 /* HapticButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 811ACE805D27DAEB43B3B7D4 /* HapticButton.swift */; };
 		48586CA89C650A8B8D4E6A95 /* UserRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CBEE9784D0BC5B93D25019 /* UserRepositories.swift */; };
@@ -46,6 +50,7 @@
 		79B6EC1608B626E2DD6F3C32 /* VRMWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EB2DFF9383C207BE6D63E4 /* VRMWebView.swift */; };
 		7A62239675DC65E57901C7F6 /* volume-mixed.svg in Resources */ = {isa = PBXBuildFile; fileRef = E64219827BFE5ED457A4BBFE /* volume-mixed.svg */; };
 		7A7738CA30CE656B039F68D7 /* SubscriptionScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26DE379A48E39C0DADEB74D6 /* SubscriptionScreen.swift */; };
+		7B28F34A707CDE632F02237D /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = DDC928FDF610D8F9AA41A7A2 /* RevenueCat */; };
 		7CF76CD19DC6DFCDF05BEA74 /* LanguageBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D45506320CDEBFBE140F8FB5 /* LanguageBundle.swift */; };
 		8126C5813B9F79BA4B8269AA /* CaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 368AF6D387C6A0FB9E51A2AE /* CaptureService.swift */; };
 		8624F809DB0D8EA0101FA0E3 /* Splash.png in Resources */ = {isa = PBXBuildFile; fileRef = 52264EB9F04DCB914DF9FB30 /* Splash.png */; };
@@ -70,15 +75,11 @@
 		ABF8F1DFB92D357E02A98B00 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00C1F7A1E7E29A204852A00 /* AppConfig.swift */; };
 		AD6AAB69331FB836CCFA5B42 /* CallControlsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBE74B6D97F2FBB1CF282CD /* CallControlsOverlay.swift */; };
 		B588C76D0A99854D16B5332D /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 09E6C66BFFF9B5E1423C2BCA /* Supabase */; };
-		5EE5EE5EE5EE5EE5EE5EE5EE /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 6FF6FF6FF6FF6FF6FF6FF6FF /* RevenueCat */; };
 		B6AB61DB0DA5C389657D6954 /* BaseRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7A17D1B4748111970D51793 /* BaseRepository.swift */; };
 		B9F0941B363A824838BD1D61 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = A110F81A654D4667451AC2E6 /* Haptics.swift */; };
 		BAD8528812A211A25E6A18E5 /* streak.svg in Resources */ = {isa = PBXBuildFile; fileRef = 2C72043BDB547299802DD47E /* streak.svg */; };
 		C3B5039528B97AD82876A0FC /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57B58527C42CBB15D868D3C6 /* RootView.swift */; };
 		CC6F12BCDF6088E1FE44AD28 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60B4307C8F5EFE7BEAA2F342 /* AuthManager.swift */; };
-		2BBC2BBC2BBC2BBC2BBC2BBC /* VRMAssetCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AAB1AAB1AAB1AAB1AAB1AAB /* VRMAssetCache.swift */; };
-		4DDE4DDE4DDE4DDE4DDE4DDE /* VRMSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CCD3CCD3CCD3CCD3CCD3CCD /* VRMSchemeHandler.swift */; };
-		8FF8FF8FF8FF8FF8FF8FF8FF /* RevenueCatManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB9BB9BB9BB9BB9BB9BB9BB /* RevenueCatManager.swift */; };
 		CFEB3AA2DE1186AA44466A36 /* OnboardingV2Screen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59AB31DA51CC913717D695F5 /* OnboardingV2Screen.swift */; };
 		D6E9CFAD5EABA26B8D5C85D5 /* AppSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 075561C132D990F8E659CFA2 /* AppSetting.swift */; };
 		D8802FF06014696A19953139 /* Economy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A9BF0FC626574C344854DD /* Economy.swift */; };
@@ -100,6 +101,7 @@
 /* Begin PBXFileReference section */
 		075561C132D990F8E659CFA2 /* AppSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSetting.swift; sourceTree = "<group>"; };
 		07C9B46C2F2BE899ABCA4813 /* RemoteSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteSettings.swift; sourceTree = "<group>"; };
+		0C8B03AB8BA8AEBFC52E39F2 /* RevenueCatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevenueCatManager.swift; sourceTree = "<group>"; };
 		121F1692989C9D985708024E /* CatalogRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogRepositories.swift; sourceTree = "<group>"; };
 		12D822A9C93A39B2E4EE25E3 /* RoxieApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoxieApp.swift; sourceTree = "<group>"; };
 		13049697D18E30EB58AC909B /* AppSettingsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsRepository.swift; sourceTree = "<group>"; };
@@ -123,10 +125,6 @@
 		5DEC3897FD29DD61DD0AD6F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5E4B42AA03ECD4547B7DFAAB /* SignInScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInScreen.swift; sourceTree = "<group>"; };
 		60B4307C8F5EFE7BEAA2F342 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
-		1AAB1AAB1AAB1AAB1AAB1AAB /* VRMAssetCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VRMAssetCache.swift; sourceTree = "<group>"; };
-		3CCD3CCD3CCD3CCD3CCD3CCD /* VRMSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VRMSchemeHandler.swift; sourceTree = "<group>"; };
-		9BB9BB9BB9BB9BB9BB9BB9BB /* RevenueCatManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevenueCatManager.swift; sourceTree = "<group>"; };
-		ABCABCABCABCABCABCABCABC /* Bonie.storekit */ = {isa = PBXFileReference; lastKnownFileType = file.storekit; path = Bonie.storekit; sourceTree = "<group>"; };
 		60FCC70FF9410E95BE544551 /* SceneAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneAppearance.swift; sourceTree = "<group>"; };
 		6119C2896B3DDAF86646123D /* UserPreferencesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferencesService.swift; sourceTree = "<group>"; };
 		62F82348714C7172ABA43D23 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
@@ -135,6 +133,7 @@
 		6B8126F9908DCD35E2C0EBCC /* AppRootModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRootModel.swift; sourceTree = "<group>"; };
 		6C753AF754851405E231ACEC /* ChatInputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputBar.swift; sourceTree = "<group>"; };
 		6D71A4AB448203A5097310AC /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
+		700896BAC077729DCB0C6DA6 /* VRMAssetCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VRMAssetCache.swift; sourceTree = "<group>"; };
 		734502F57C39F205CF6DD9F3 /* VRMContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VRMContext.swift; sourceTree = "<group>"; };
 		74502B05FF160A76C30C8BE1 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		74CF97BFFD30A76A7CF85D22 /* ImageOnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOnboardingScreen.swift; sourceTree = "<group>"; };
@@ -188,7 +187,9 @@
 		EA92BEFA2277198B6CD2E65E /* MediaSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSheet.swift; sourceTree = "<group>"; };
 		ECB06A69F4540960605A6C0F /* gift.svg */ = {isa = PBXFileReference; path = gift.svg; sourceTree = "<group>"; };
 		EDBE74B6D97F2FBB1CF282CD /* CallControlsOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsOverlay.swift; sourceTree = "<group>"; };
+		F2AEF5B636B2BFB2817269AE /* Bonie.storekit */ = {isa = PBXFileReference; path = Bonie.storekit; sourceTree = "<group>"; };
 		F6354F65D70838E2C1D79E62 /* Roxie.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Roxie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F8E8099652CC7805C3BC04AD /* VRMSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VRMSchemeHandler.swift; sourceTree = "<group>"; };
 		FEEF07D1C07878CF9E7869E6 /* LevelBadge.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = LevelBadge.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -198,7 +199,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B588C76D0A99854D16B5332D /* Supabase in Frameworks */,
-				5EE5EE5EE5EE5EE5EE5EE5EE /* RevenueCat in Frameworks */,
+				7B28F34A707CDE632F02237D /* RevenueCat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,9 +233,9 @@
 			isa = PBXGroup;
 			children = (
 				87FE59F245992FBCF703510C /* Assets.xcassets */,
+				F2AEF5B636B2BFB2817269AE /* Bonie.storekit */,
 				5DEC3897FD29DD61DD0AD6F1 /* Info.plist */,
 				9C2BCAFF5FF76C82D61DF73A /* Roxie.entitlements */,
-				ABCABCABCABCABCABCABCABC /* Bonie.storekit */,
 				12D822A9C93A39B2E4EE25E3 /* RoxieApp.swift */,
 				2D6B5A5BFD8C792357FBF5E3 /* Config */,
 				BA5242555E1559295F91D763 /* Localization */,
@@ -362,12 +363,12 @@
 				A03836A64C3A3E8C88975462 /* CommercialSDKStubs.swift */,
 				A110F81A654D4667451AC2E6 /* Haptics.swift */,
 				07C9B46C2F2BE899ABCA4813 /* RemoteSettings.swift */,
-				9BB9BB9BB9BB9BB9BB9BB9BB /* RevenueCatManager.swift */,
+				0C8B03AB8BA8AEBFC52E39F2 /* RevenueCatManager.swift */,
 				AFE7B355CDE1B3018D33767D /* SupabaseService.swift */,
 				6119C2896B3DDAF86646123D /* UserPreferencesService.swift */,
-				1AAB1AAB1AAB1AAB1AAB1AAB /* VRMAssetCache.swift */,
-				3CCD3CCD3CCD3CCD3CCD3CCD /* VRMSchemeHandler.swift */,
 				16C3FB224CD23C0D5476DA0B /* VoiceCallService.swift */,
+				700896BAC077729DCB0C6DA6 /* VRMAssetCache.swift */,
+				F8E8099652CC7805C3BC04AD /* VRMSchemeHandler.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -479,7 +480,7 @@
 			name = Roxie;
 			packageProductDependencies = (
 				09E6C66BFFF9B5E1423C2BCA /* Supabase */,
-				6FF6FF6FF6FF6FF6FF6FF6FF /* RevenueCat */,
+				DDC928FDF610D8F9AA41A7A2 /* RevenueCat */,
 			);
 			productName = Roxie;
 			productReference = F6354F65D70838E2C1D79E62 /* Roxie.app */;
@@ -495,7 +496,7 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					11F1D7F171E57928D537C0DC = {
-						DevelopmentTeam = 3R35J4385N;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -512,8 +513,8 @@
 			mainGroup = 6335728748EA94EEC2628EAA;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				5C17536B1B5761519298FA16 /* XCRemoteSwiftPackageReference "purchases-ios" */,
 				45BC4B350EF8F86D54322F75 /* XCRemoteSwiftPackageReference "supabase-swift" */,
-				7AA7AA7AA7AA7AA7AA7AA7AA /* XCRemoteSwiftPackageReference "purchases-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E5DD85769D273751C459CE95 /* Products */;
@@ -531,6 +532,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				032B2A9C9A46B72547C334B4 /* Assets.xcassets in Resources */,
+				3A0F0A710C65C35F23E1CAFB /* Bonie.storekit in Resources */,
 				66FD71785425A7805A6B01EA /* LevelBadge.png in Resources */,
 				5EA636CE73A4E118050AC76B /* Localizable.strings in Resources */,
 				9DB634115DE5094FD964EE76 /* Ruby.png in Resources */,
@@ -605,7 +607,7 @@
 				0128ABDD00B73249DC170698 /* Palette.swift in Sources */,
 				AB3BE1CD24E654C6157B1E8D /* Persistence.swift in Sources */,
 				4DB52CDD1159E72ECAEB66A1 /* RemoteSettings.swift in Sources */,
-				8FF8FF8FF8FF8FF8FF8FF8FF /* RevenueCatManager.swift in Sources */,
+				1CDAD10F88CC0339E28278A7 /* RevenueCatManager.swift in Sources */,
 				C3B5039528B97AD82876A0FC /* RootView.swift in Sources */,
 				F700509CC3FCEE018966E1E8 /* RoxieApp.swift in Sources */,
 				3759F46EFA73E77AEE668090 /* SceneAppearance.swift in Sources */,
@@ -617,10 +619,10 @@
 				323CA817C86DB9BD83309FED /* TypingIndicator.swift in Sources */,
 				945D77BECA2F7063D7DC7C6C /* UserPreferencesService.swift in Sources */,
 				48586CA89C650A8B8D4E6A95 /* UserRepositories.swift in Sources */,
+				358EBC91710633C69A839B69 /* VRMAssetCache.swift in Sources */,
 				E4765F78B3D65EAE6FED0FBD /* VRMContext.swift in Sources */,
-				2BBC2BBC2BBC2BBC2BBC2BBC /* VRMAssetCache.swift in Sources */,
-				4DDE4DDE4DDE4DDE4DDE4DDE /* VRMSchemeHandler.swift in Sources */,
 				8D4EA76AAC756FFB5B0D82BE /* VRMExperienceScreen.swift in Sources */,
+				362D23013C33A1E21FF30ADE /* VRMSchemeHandler.swift in Sources */,
 				91754ADE8BE4E342B0CCB82D /* VRMUIOverlay.swift in Sources */,
 				79B6EC1608B626E2DD6F3C32 /* VRMWebView.swift in Sources */,
 				8C7C811BAC82F6C5CDC0E626 /* VoiceCallService.swift in Sources */,
@@ -650,9 +652,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Roxie/Roxie.entitlements;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3R35J4385N;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Roxie/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -661,7 +663,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = eduto.bonie;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eduto.roxieswift;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -673,9 +675,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Roxie/Roxie.entitlements;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3R35J4385N;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Roxie/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -684,7 +686,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = eduto.bonie;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eduto.roxieswift;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -848,7 +850,7 @@
 				minimumVersion = 2.23.0;
 			};
 		};
-		7AA7AA7AA7AA7AA7AA7AA7AA /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
+		5C17536B1B5761519298FA16 /* XCRemoteSwiftPackageReference "purchases-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RevenueCat/purchases-ios";
 			requirement = {
@@ -864,9 +866,9 @@
 			package = 45BC4B350EF8F86D54322F75 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
 		};
-		6FF6FF6FF6FF6FF6FF6FF6FF /* RevenueCat */ = {
+		DDC928FDF610D8F9AA41A7A2 /* RevenueCat */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 7AA7AA7AA7AA7AA7AA7AA7AA /* XCRemoteSwiftPackageReference "purchases-ios" */;
+			package = 5C17536B1B5761519298FA16 /* XCRemoteSwiftPackageReference "purchases-ios" */;
 			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */

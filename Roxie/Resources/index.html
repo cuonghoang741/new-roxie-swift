@@ -306,17 +306,16 @@
         // Combine all files for the app to see
         const fbxFiles = [...legacyFbxFiles, ...proFbxFiles];
 
-        // When running inside the native iOS shell, route asset URLs through
-        // the `vrmcache://` scheme so the Swift disk cache (VRMAssetCache)
-        // serves files persisted across launches. On the web, fall back to
-        // the real CDN URLs.
+        // When running inside the native iOS shell (Swift WKWebView), route
+        // VRM model URLs through the `vrmcache://` custom scheme so the
+        // VRMSchemeHandler serves blobs from the on-disk VRMAssetCache —
+        // VRM models are heavy and we want them persisted across launches.
+        // FBX animation URLs stay on real https (the FBXLoader path can't
+        // hit a custom scheme cleanly), so the FBX_BASE_URL constants below
+        // are intentionally left untouched.
         const VRM_BASE_URL = window.__isNativeShell
             ? 'vrmcache://r2-chars/'
             : 'https://pub-6671ed00c8d945b28ff7d8ec392f60b8.r2.dev/CHARACTERS/';
-        // FBX loaders (three.js FBXLoader) fail to load from the
-        // `vrmcache://` custom scheme — they go through fetch+CORS which
-        // rejects schemes without an origin. So FBX always uses real https.
-        // (VRM is fine via vrmcache because GLTFLoader uses XHR internally.)
         const FBX_BASE_URL = 'https://n6n.top/Anim/';
         const FBX_BASE_URL_2 = 'https://pub-8b57fd6b30c04b11b3f3a092bdfed0e2.r2.dev/';
 
@@ -436,9 +435,9 @@
         function fetchAndCacheObjectURL(name, baseUrl, cacheMap) {
             if (cacheMap.has(name)) return cacheMap.get(name);
             const url = baseUrl + encodeURI(name);
-            // XHR works for the `vrmcache://` custom scheme handler; `fetch`
-            // with `mode: 'cors'` is rejected because custom schemes have no
-            // origin. Real http(s) URLs work via either path.
+            // XHR works for both the `vrmcache://` custom scheme handler
+            // (custom schemes have no origin and are rejected by `fetch` +
+            // CORS) and regular https. Real cdn URLs work via either path.
             const promise = new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', url, true);
@@ -1239,24 +1238,6 @@
                     updateFileDisplay(modelName, document.getElementById('currentAnimation').textContent);
                     setupBlendshapes(vrm);
 
-                    // Auto-play Idle Stand so the character isn't stuck in
-                    // the default T-pose. Deferred via setTimeout to give the
-                    // mixer one frame to finalize. User/native calls to
-                    // loadAnimationByName afterwards will cross-fade out of it.
-                    //
-                    // We pre-resolve to a blob URL because FBXLoader fails to
-                    // load directly from the `vrmcache://` custom scheme
-                    // (three.js's internal fetch path doesn't pass CORS for
-                    // non-http origins). The blob URL produced by our cache
-                    // is loader-agnostic.
-                    setTimeout(() => {
-                        try {
-                            if (currentAction || !currentVrm || !currentMixer) return;
-                            console.log('🎬 Auto-playing Idle Stand');
-                            window.loadAnimationByName('Idle Stand');
-                        } catch (e) { console.warn('Auto-idle failed', e); }
-                    }, 100);
-
                     // Start expressions after animation is applied
                     const startExpressions = () => {
                         startRandomBlinking(vrm);
@@ -1355,7 +1336,7 @@
                     }
                 })
                 .catch((error) => {
-                    console.error('loadHumanoidAnimation failed for', animationName, '@', animationUrl, '-', error?.message || error);
+                    console.error('loadFBX failed for', animationName, '@', animationUrl, '-', error?.message || error);
                     updateFileDisplay(document.getElementById('currentModel').textContent, 'Error: ' + error.message);
                 });
         }
