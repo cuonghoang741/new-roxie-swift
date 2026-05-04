@@ -38,7 +38,14 @@ struct VRMWebView: UIViewRepresentable {
                 try {
                     const text = '[js:' + level + '] ' + Array.from(args).map(a => {
                         if (typeof a === 'string') return a;
-                        try { return JSON.stringify(a); } catch (_) { return String(a); }
+                        // Cap serialization at 500 chars. JSON.stringify on a
+                        // VRM/THREE scene blocks the JS thread for seconds and
+                        // shoves megabytes through the WK message bridge —
+                        // exactly the freeze we hunted down on costume swap.
+                        try {
+                            const s = JSON.stringify(a);
+                            return s && s.length > 500 ? s.slice(0, 500) + '…[truncated]' : s;
+                        } catch (_) { return String(a); }
                     }).join(' ');
                     window.webkit?.messageHandlers?.loading?.postMessage(text);
                 } catch (_) {}

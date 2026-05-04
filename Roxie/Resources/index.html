@@ -924,7 +924,7 @@
             stopRandomBlinking();
             // Store reference to current vrm for this instance
             const targetVrm = vrm;
-            console.log('Starting blinking for VRM:', vrm);
+            console.log('Starting blinking for VRM');
             const blinkExpressions = ['blink', 'blinkLeft', 'blinkRight', 'Blink', 'eyesClosed'];
             let blinkAnimationFrame = null;
             let blinkStartTime = 0;
@@ -1003,7 +1003,7 @@
             if (!vrm || !vrm.expressionManager) return;
             stopRandomSmiling();
             const targetVrm = vrm;
-            console.log('Starting smiling for VRM:', vrm);
+            console.log('Starting smiling for VRM');
             const smileExpressions = ['happy', 'joy', 'Joy', 'smile', 'Smile', 'fun', 'relaxed', 'smileOpen'];
             let smileAnimationFrame = null;
             let smileStartTime = 0;
@@ -1086,7 +1086,7 @@
             if (!vrm || !vrm.expressionManager) return;
             stopAmbientMicroExpressions();
             const targetVrm = vrm;
-            console.log('Starting ambient expressions for VRM:', vrm);
+            console.log('Starting ambient expressions for VRM');
             const positiveCandidates = [
                 'happy', 'joy', 'fun', 'relaxed', 'lowered', 'raised', // generic positive/eyebrow
                 'ee', 'oh', 'aa', 'ih', 'ou' // subtle mouth shapes (speech-like micro-movements)
